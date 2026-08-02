@@ -1,4 +1,5 @@
-const { getProject, setProject, deleteProject, isConfigured } = require('../../lib/store');
+const { getProject, setProject, deleteProject, removeUserProject, isConfigured } = require('../../lib/store');
+const { getSessionUser } = require('../../lib/session');
 
 function toDate(value) {
   const [y, m, d] = String(value).split('-').map(Number);
@@ -82,6 +83,20 @@ module.exports = async (req, res) => {
         return;
       }
       await deleteProject(id);
+      // 過去に作成したプロジェクト一覧からも、削除したプロジェクトを取り除く。
+      // 作成時に保存した所有者IDに加えて、削除操作を行った時点のログインセッションも
+      // 念のため対象にすることで、以前から存在するプロジェクトでも一覧から消えるようにする。
+      const owners = new Set();
+      if (data.ownerSub) owners.add(data.ownerSub);
+      const sessionUser = getSessionUser(req.headers.cookie);
+      if (sessionUser) owners.add(sessionUser.sub);
+      for (const sub of owners) {
+        try {
+          await removeUserProject(sub, id);
+        } catch (e) {
+          // 一覧からの削除に失敗しても、プロジェクト自体の削除は成功として扱う
+        }
+      }
       res.status(200).json({ deleted: true });
       return;
     }
