@@ -2,9 +2,24 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#f7f4ef" />
   <title>KASANE｜美しい日程調整</title>
+  <script>
+    // 一部のアプリ内ブラウザ（webview）は width=device-width を正しく解釈せず、
+    // デスクトップ向けの幅でレンダリングしてピンチズームが必要になることがあるため、
+    // 実際の画面幅を計算してviewportを上書きする保険処理。
+    (function () {
+      try {
+        var mv = document.querySelector('meta[name="viewport"]');
+        if (!mv) return;
+        var w = Math.min(window.screen.width || 0, window.screen.availWidth || window.screen.width || 0) || window.innerWidth;
+        if (w && w > 0 && w < 900) {
+          mv.setAttribute('content', 'width=' + w + ',initial-scale=1,maximum-scale=1,viewport-fit=cover');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
       --bg: #f7f4ef;
@@ -30,9 +45,11 @@
       --radius-sm: 10px;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
     body {
       margin: 0;
+      overflow-x: hidden;
+      width: 100%;
       color: var(--ink);
       background:
         radial-gradient(circle at 8% 0%, rgba(180,147,97,.12), transparent 30%),
@@ -155,6 +172,7 @@
     .btn-maybe { background: var(--maybe); color:#fff; }
     .btn-danger { background:#fff4f4; color:#b33a44; border:1px solid #ffd4d6; }
     .btn-small { min-height: 38px; padding: 0 13px; font-size: 13px; }
+    .btn:disabled { opacity:.42; cursor:not-allowed; transform:none; box-shadow:none; }
     .stats-card { padding: 24px; display:grid; gap:14px; }
     .mini-stat { padding: 18px; background: rgba(255,255,255,.72); border:1px solid var(--line); border-radius: 18px; }
     .mini-stat-label { font-size:12px; color:var(--muted); margin-bottom:8px; }
@@ -177,6 +195,7 @@
       color:var(--ink);
       padding:12px 13px;
       min-height:46px;
+      font-size:16px;
       transition:border .16s ease, box-shadow .16s ease;
     }
     .textarea { min-height:112px; resize:vertical; line-height:1.7; }
@@ -184,7 +203,9 @@
     .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .helper { font-size:11px; color:var(--muted); line-height:1.6; }
     .share-box { display:flex; gap:8px; margin-top:10px; }
-    .share-box .input { font-size:12px; }
+    .share-box .input { font-size:16px; min-height:44px; }
+    .share-box { flex-wrap:wrap; }
+    .share-box .input { flex:1 1 160px; min-width:0; }
     .participant-header {
       display:flex; flex-wrap:wrap; align-items:end; gap:12px;
       margin-bottom:18px;
@@ -288,6 +309,48 @@
       opacity:0; transform:translateY(10px); pointer-events:none; transition:.22s ease;
     }
     .toast.show { opacity:1; transform:translateY(0); }
+    .drag-hint {
+      display:flex; align-items:center; gap:9px; margin-bottom:14px;
+      padding:11px 14px; border-radius:14px;
+      background:var(--maybe-soft); color:#2f4faa; font-size:12.5px; line-height:1.6; font-weight:700;
+    }
+    .drag-hint .drag-hint-icon { font-size:16px; flex:none; }
+    .scroll-hint { font-size:11px; color:var(--muted); margin:8px 2px 0; display:none; }
+    .danger-zone { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
+    .danger-zone .section-label { color:#b33a44; }
+    .danger-zone .helper { margin-bottom:10px; }
+    .modal-overlay {
+      display:none; position:fixed; inset:0; z-index:90;
+      background:rgba(20,24,32,.52); backdrop-filter:blur(3px);
+      align-items:center; justify-content:center; padding:18px;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal {
+      background:#fff; border-radius:var(--radius-xl); box-shadow:var(--shadow);
+      width:100%; max-width:520px; max-height:88vh; overflow:auto;
+      padding:26px;
+    }
+    .modal-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:6px; }
+    .modal-head h2 { font-size:19px; margin:0; }
+    .modal-close { border:0; background:transparent; color:var(--muted); font-size:20px; line-height:1; padding:4px; min-height:0; }
+    .modal-note {
+      margin:14px 0; padding:12px 14px; border-radius:13px;
+      background:#fff8e9; color:#825b16; border:1px solid #f1dfb3;
+      font-size:12.5px; line-height:1.7; font-weight:700;
+    }
+    .modal-summary {
+      width:100%; min-height:150px; max-height:260px; resize:vertical;
+      border:1px solid var(--line); border-radius:15px; padding:14px;
+      background:#fbfaf8; color:#424a56; font-size:13px; line-height:1.8;
+      white-space:pre-wrap; font-family:inherit;
+    }
+    .modal-divider { border:0; border-top:1px solid var(--line); margin:20px 0; }
+    .modal-email-row { display:flex; gap:8px; flex-wrap:wrap; }
+    .modal-email-row .input { flex:1 1 200px; min-width:0; }
+    .email-status { margin-top:9px; font-size:12px; line-height:1.6; display:none; }
+    .email-status.show { display:block; }
+    .email-status.ok { color:#236c56; }
+    .email-status.warn { color:#a06c16; }
     .mobile-toolbar { display:none; }
     @media (max-width: 1020px) {
       .hero { grid-template-columns:1fr; }
@@ -330,6 +393,9 @@
       .mobile-tool.yes { background:var(--yes-soft); color:#b63f47; }
       .mobile-tool.maybe { background:var(--maybe-soft); color:#355ecb; }
       .mobile-tool.save { background:var(--accent); color:white; }
+      .modal { padding:20px; border-radius:20px; }
+      .modal-head h2 { font-size:17px; }
+      .danger-zone .btn { width:100%; }
     }
   </style>
 </head>
@@ -454,6 +520,11 @@
               </div>
               <div class="helper" style="margin-top:8px">このURLだけが設定変更・初期化を行えます。他の人に共有しないでください。</div>
             </div>
+            <div class="danger-zone host-only" id="dangerZone" style="display:none">
+              <div class="section-label">危険な操作</div>
+              <div class="helper">プロジェクトを削除すると、すべての回答データも完全に削除されます。この操作は取り消せません。</div>
+              <button class="btn btn-danger btn-small" id="deleteProject" style="width:100%">🗑 プロジェクトを削除</button>
+            </div>
           </aside>
           <div class="card">
             <div class="card-head">
@@ -481,10 +552,15 @@
               </div>
               <button class="btn btn-secondary" id="parseNatural">日程に反映</button>
             </div>
+            <div class="drag-hint">
+              <span class="drag-hint-icon">👆</span>
+              <span>指（またはマウス）でマスをなぞってドラッグすると、その範囲をまとめて連続選択できます。1マスずつタップしてもOKです。</span>
+            </div>
             <div class="parse-status" id="parseStatus"></div>
             <div class="schedule-wrap" id="scheduleWrap">
               <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
+            <div class="scroll-hint" id="scrollHint">↔️ 日程が多いときは、表を横にスクロールして確認できます</div>
             <div class="legend">
               <div class="legend-item"><span class="dot yes"></span> ○ 行ける</div>
               <div class="legend-item"><span class="dot maybe"></span> △ 行けるかも</div>
@@ -493,7 +569,10 @@
             </div>
             <div class="action-footer">
               <div class="save-note">「回答を送信」を押すとサーバーに保存され、共有URLを知る全員に公開されます。</div>
-              <button class="btn btn-primary" id="saveResponse">この内容で回答を送信</button>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-secondary" id="undoLast" disabled title="直前の1操作を取り消します">↩ 1個戻る</button>
+                <button class="btn btn-primary" id="saveResponse">この内容で回答を送信</button>
+              </div>
             </div>
           </div>
         </div>
@@ -576,6 +655,26 @@
       <button class="mobile-tool save" id="mobileSave">送信</button>
     </div>
     <div class="toast" id="toast"></div>
+    <div class="modal-overlay" id="submitModalOverlay">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="submitModalTitle">
+        <div class="modal-head">
+          <h2 id="submitModalTitle">回答を送信しました ✅</h2>
+          <button class="modal-close" id="closeSubmitModal" aria-label="閉じる">×</button>
+        </div>
+        <div class="card-sub" id="submitModalName"></div>
+        <div class="modal-note">📸 この内容は保存されません。忘れないよう、この画面をスクリーンショットして保存してください。</div>
+        <textarea class="modal-summary" id="submitSummaryText" readonly></textarea>
+        <hr class="modal-divider" />
+        <div class="section-label" style="margin-top:0">メールでも受け取る（任意）</div>
+        <div class="helper" style="margin-bottom:10px">メールアドレスを入力すると、上の内容を送信して控えを残せます。</div>
+        <div class="modal-email-row">
+          <input class="input" type="email" id="notifyEmail" placeholder="例：you@example.com" autocomplete="email" />
+          <button class="btn btn-secondary" id="sendEmailBtn">メールで送信</button>
+        </div>
+        <div class="email-status" id="emailSendStatus"></div>
+        <button class="btn btn-primary" id="submitModalOk" style="width:100%;margin-top:20px">閉じる</button>
+      </div>
+    </div>
   </div>
   <script>
     const jpWeek = ['日','月','火','水','木','金','土'];
@@ -598,7 +697,9 @@
       draft: {},
       responses: {},
       isDragging: false,
-      dragMode: null
+      dragMode: null,
+      pendingBatch: null,
+      undoBatch: null
     };
     const $ = (q, root=document) => root.querySelector(q);
     const $$ = (q, root=document) => [...root.querySelectorAll(q)];
@@ -701,6 +802,16 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { showToast(data.error || '初期化に失敗しました'); return false; }
       state.responses = {};
+      return true;
+    }
+    async function deleteProjectRemote() {
+      const res = await fetch(`/api/project/${PROJECT_ID}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: HOST_TOKEN })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { showToast(data.error || '削除に失敗しました'); return false; }
       return true;
     }
     async function demoRemote() {
@@ -807,13 +918,54 @@
       });
       bindScheduleInteractions();
     }
+    function beginBatch() {
+      state.pendingBatch = new Map();
+    }
+    function recordChange(k) {
+      if (state.pendingBatch && !state.pendingBatch.has(k)) {
+        state.pendingBatch.set(k, state.draft[k]);
+      }
+    }
+    function commitBatch() {
+      if (state.pendingBatch && state.pendingBatch.size) {
+        state.undoBatch = state.pendingBatch;
+        updateUndoButton();
+      }
+      state.pendingBatch = null;
+    }
+    function updateUndoButton() {
+      const btn = $('#undoLast');
+      if (btn) btn.disabled = !(state.undoBatch && state.undoBatch.size);
+    }
+    function clearUndo() {
+      state.undoBatch = null;
+      state.pendingBatch = null;
+      updateUndoButton();
+    }
+    function undoLast() {
+      if (!state.undoBatch || !state.undoBatch.size) { showToast('取り消せる操作がありません'); return; }
+      state.undoBatch.forEach((prev, k) => {
+        if (prev === undefined) delete state.draft[k]; else state.draft[k] = prev;
+      });
+      state.undoBatch = null;
+      updateUndoButton();
+      renderSchedule();
+      showToast('直前の操作を取り消しました');
+    }
     function applyToCell(cell, mode=state.mode) {
       const k = cell.dataset.key;
       if (!k) return;
+      recordChange(k);
       if (mode === 'erase') delete state.draft[k];
       else state.draft[k] = mode;
       cell.classList.toggle('yes', state.draft[k] === 'yes');
       cell.classList.toggle('maybe', state.draft[k] === 'maybe');
+    }
+    function updateScrollHint() {
+      const wrap = $('#scheduleWrap');
+      const hint = $('#scrollHint');
+      if (!wrap || !hint) return;
+      hint.style.display = wrap.scrollWidth > wrap.clientWidth + 4 ? 'block' : 'none';
     }
     function bindScheduleInteractions() {
       const grid = $('#scheduleGrid');
@@ -822,6 +974,7 @@
           e.preventDefault();
           state.isDragging = true;
           state.dragMode = state.mode;
+          beginBatch();
           applyToCell(cell, state.dragMode);
           cell.classList.add('dragging');
         });
@@ -839,13 +992,17 @@
         btn.addEventListener('click', () => {
           const date = btn.dataset.fillDate;
           const type = btn.dataset.fillType;
+          beginBatch();
           getTimes().forEach(time => {
             const k = key(date,time);
+            recordChange(k);
             if (type === 'erase') delete state.draft[k]; else state.draft[k] = type;
           });
+          commitBatch();
           renderSchedule();
         });
       });
+      updateScrollHint();
     }
     function normalizeJapaneseDigits(text) {
       return text.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
@@ -858,6 +1015,7 @@
         const m = timeToMinutes(time);
         if (m >= fromM && m < toM) {
           const k = key(dateStr,time);
+          recordChange(k);
           if (type === 'erase') delete state.draft[k]; else state.draft[k] = type;
         }
       });
@@ -895,12 +1053,14 @@
         const entries = Array.isArray(data.entries) ? data.entries : [];
         const validDates = new Set(getDates().map(ymd));
         let applied = 0;
+        beginBatch();
         entries.forEach(entry => {
           if (!entry || !validDates.has(entry.date)) return;
           if (!['yes', 'maybe', 'erase'].includes(entry.type)) return;
           fillDate(entry.date, entry.type, entry.from || null, entry.to || null);
           applied++;
         });
+        commitBatch();
         renderSchedule();
         status.className = 'parse-status show ' + (applied ? 'ok' : 'warn');
         status.textContent = applied
@@ -917,10 +1077,67 @@
       const name = $('#participantName').value.trim();
       if (!name) { showToast('お名前を入力してください'); $('#participantName').focus(); return; }
       if (!Object.keys(state.draft).length) { showToast('参加できる日程を選択してください'); return; }
-      const ok = await saveResponseRemote(name, {...state.draft}, $('#naturalInput').value.trim());
+      const availability = {...state.draft};
+      const originalText = $('#naturalInput').value.trim();
+      const ok = await saveResponseRemote(name, availability, originalText);
       if (!ok) return;
       updateAll();
+      clearUndo();
       showToast(`${name}さんの回答を送信しました`);
+      openSubmitModal(name, availability);
+    }
+    function openSubmitModal(name, availability) {
+      const overlay = $('#submitModalOverlay');
+      $('#submitModalName').textContent = `${name}さんの回答（${state.project.name}）`;
+      const summary =
+        `【${state.project.name}】\n${name}さんの回答\n\n` +
+        summarizeAvailability(availability) +
+        `\n\n送信日時：${new Date().toLocaleString('ja-JP')}`;
+      $('#submitSummaryText').value = summary;
+      $('#notifyEmail').value = '';
+      const status = $('#emailSendStatus');
+      status.className = 'email-status';
+      status.textContent = '';
+      overlay.classList.add('show');
+    }
+    function closeSubmitModal() {
+      $('#submitModalOverlay').classList.remove('show');
+    }
+    async function sendSummaryEmail() {
+      const emailInput = $('#notifyEmail');
+      const email = emailInput.value.trim();
+      const status = $('#emailSendStatus');
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        status.className = 'email-status show warn';
+        status.textContent = '正しいメールアドレスを入力してください。';
+        emailInput.focus();
+        return;
+      }
+      const btn = $('#sendEmailBtn');
+      btn.disabled = true;
+      status.className = 'email-status show';
+      status.textContent = '送信しています…';
+      try {
+        const res = await fetch(`/api/project/${PROJECT_ID}/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            projectName: state.project.name,
+            summary: $('#submitSummaryText').value
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'メール送信に失敗しました。');
+        status.className = 'email-status show ok';
+        status.textContent = `${email} 宛に送信しました。届かない場合は迷惑メールフォルダもご確認ください。`;
+      } catch (e) {
+        status.className = 'email-status show warn';
+        status.textContent = e.message || 'メール送信中にエラーが発生しました。';
+      } finally {
+        btn.disabled = false;
+      }
     }
     function formatDate(dateStr) {
       const d = toDate(dateStr);
@@ -1019,6 +1236,7 @@
         const name = btn.dataset.editPerson;
         const p = state.responses[name];
         state.draft = {...p.availability};
+        clearUndo();
         $('#participantName').value = name;
         $('#naturalInput').value = p.originalText || '';
         switchView('schedule');
@@ -1090,6 +1308,7 @@
     function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
     function escapeAttr(str) { return escapeHtml(str); }
     function stopDragging() {
+      if (state.isDragging) commitBatch();
       state.isDragging = false;
       $$('.slot.dragging').forEach(c => c.classList.remove('dragging'));
     }
@@ -1125,6 +1344,7 @@
       const ok = await saveSettingsRemote(next);
       if (!ok) return;
       state.draft = {};
+      clearUndo();
       $('#scheduleTitle').textContent = state.project.name;
       renderSchedule(); updateAll(); showToast('プロジェクト設定を反映しました');
     }
@@ -1149,8 +1369,24 @@
       if (!confirm('すべての回答データを初期化しますか？この操作は取り消せません。')) return;
       const ok = await resetRemote();
       if (!ok) return;
-      state.draft={}; renderSchedule(); updateAll(); showToast('データを初期化しました');
+      state.draft={}; clearUndo(); renderSchedule(); updateAll(); showToast('データを初期化しました');
     });
+    $('#undoLast').addEventListener('click', undoLast);
+    $('#deleteProject').addEventListener('click', async () => {
+      if (!isHost) { showToast('削除には管理用URLが必要です'); return; }
+      if (!confirm(`「${state.project.name}」を削除しますか？\nすべての回答データも完全に削除され、元に戻せません。`)) return;
+      const btn = $('#deleteProject');
+      btn.disabled = true;
+      const ok = await deleteProjectRemote();
+      if (!ok) { btn.disabled = false; return; }
+      showToast('プロジェクトを削除しました');
+      setTimeout(() => { location.href = './index.html'; }, 900);
+    });
+    $('#closeSubmitModal').addEventListener('click', closeSubmitModal);
+    $('#submitModalOk').addEventListener('click', closeSubmitModal);
+    $('#submitModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'submitModalOverlay') closeSubmitModal(); });
+    $('#sendEmailBtn').addEventListener('click', sendSummaryEmail);
+    window.addEventListener('resize', updateScrollHint);
     document.addEventListener('pointerup', stopDragging);
     document.addEventListener('pointercancel', stopDragging);
     (async function init() {
