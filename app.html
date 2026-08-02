@@ -357,11 +357,12 @@
     .email-status.warn { color:#a06c16; }
     .mobile-toolbar { display:none; }
     @media (max-width: 1020px) {
-      .hero { grid-template-columns:1fr; }
-      .layout { grid-template-columns:1fr; }
+      .hero { grid-template-columns: minmax(0,1fr); }
+      .layout { grid-template-columns: minmax(0,1fr); }
       .sticky-card { position:static; }
-      .analysis-grid { grid-template-columns:1fr; }
-      .stats-card { grid-template-columns:repeat(3,1fr); }
+      .analysis-grid { grid-template-columns: minmax(0,1fr); }
+      .stats-card { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .hero-card, .card, #settingsCard, .sticky-card { min-width:0; }
     }
     @media (max-width: 760px) {
       .topbar-inner { padding:12px 14px; gap:10px; }
@@ -376,7 +377,7 @@
       .hero-card { padding:20px; }
       h1 { font-size:28px; }
       .hero-lead { font-size:14px; line-height:1.75; }
-      .stats-card { grid-template-columns:1fr; padding:16px; gap:10px; }
+      .stats-card { grid-template-columns:minmax(0,1fr); padding:16px; gap:10px; }
       .mini-stat { padding:14px; }
       .mini-stat-value { font-size:24px; }
       .card { padding:16px; }
