@@ -865,62 +865,53 @@
     function findDateByDay(day) {
       return getDates().find(d => d.getDate() === Number(day));
     }
-    function parseNaturalLanguage() {
-      let text = normalizeJapaneseDigits($('#naturalInput').value.trim());
+    async function parseNaturalLanguage() {
+      const text = normalizeJapaneseDigits($('#naturalInput').value.trim());
       const status = $('#parseStatus');
       if (!text) {
         status.className = 'parse-status show warn';
         status.textContent = '日程を文章で入力してください。';
         return;
       }
-      let applied = 0;
-      let notes = [];
-      const dates = getDates();
-      const exceptMatch = text.match(/((?:\d{1,2}日(?:\s*(?:と|、|,|・)\s*)?)+)以外[^。\n]*(?:OK|ok|オッケー|大丈夫|行ける|可能)/i);
-      if (exceptMatch) {
-        const excluded = [...exceptMatch[1].matchAll(/(\d{1,2})日/g)].map(m => Number(m[1]));
-        dates.forEach(d => {
-          if (!excluded.includes(d.getDate())) { fillDate(ymd(d),'yes'); applied++; }
-          else fillDate(ymd(d),'erase');
+      const btn = $('#parseNatural');
+      btn.disabled = true;
+      status.className = 'parse-status show';
+      status.textContent = 'AIが文章を解析しています…';
+      try {
+        const res = await fetch('/api/parse-schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            startDate: state.project.startDate,
+            endDate: state.project.endDate,
+            startTime: state.project.startTime,
+            endTime: state.project.endTime,
+            slotMinutes: state.project.slotMinutes
+          })
         });
-        notes.push(`${excluded.join('日・')}日を除いて○にしました`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '解析に失敗しました。');
+        const entries = Array.isArray(data.entries) ? data.entries : [];
+        const validDates = new Set(getDates().map(ymd));
+        let applied = 0;
+        entries.forEach(entry => {
+          if (!entry || !validDates.has(entry.date)) return;
+          if (!['yes', 'maybe', 'erase'].includes(entry.type)) return;
+          fillDate(entry.date, entry.type, entry.from || null, entry.to || null);
+          applied++;
+        });
+        renderSchedule();
+        status.className = 'parse-status show ' + (applied ? 'ok' : 'warn');
+        status.textContent = applied
+          ? `${data.summary || 'AIが日程を仮反映しました。'} 内容をご確認ください。`
+          : 'AIが日程を特定できませんでした。日付と可否をもう少し具体的に書いてみてください。';
+      } catch (e) {
+        status.className = 'parse-status show warn';
+        status.textContent = e.message || '解析中にエラーが発生しました。しばらくしてから再度お試しください。';
+      } finally {
+        btn.disabled = false;
       }
-      const rangeRe = /(\d{1,2})日[^。\n]*?(\d{1,2})(?:時|:)(?:(\d{1,2})分?)?\s*(?:から|〜|~|-)[^。\n]*?(\d{1,2})(?:時|:)(?:(\d{1,2})分?)?[^。\n]*(行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)/gi;
-      for (const m of text.matchAll(rangeRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const from = `${String(m[2]).padStart(2,'0')}:${String(m[3]||0).padStart(2,'0')}`;
-        const to = `${String(m[4]).padStart(2,'0')}:${String(m[5]||0).padStart(2,'0')}`;
-        const type = /(かも|未定|調整|可能性)/.test(m[6]) ? 'maybe' : 'yes';
-        fillDate(ymd(d),type,from,to); applied++; notes.push(`${m[1]}日 ${from}〜${to}を${type==='yes'?'○':'△'}にしました`);
-      }
-      const afterRe = /(\d{1,2})日[^。\n]*?(\d{1,2})時(?:(\d{1,2})分)?以降[^。\n]*(行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)?/gi;
-      for (const m of text.matchAll(afterRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const from = `${String(m[2]).padStart(2,'0')}:${String(m[3]||0).padStart(2,'0')}`;
-        const type = /(かも|未定|調整|可能性)/.test(m[4]||'') ? 'maybe' : 'yes';
-        fillDate(ymd(d),type,from,null); applied++; notes.push(`${m[1]}日 ${from}以降を${type==='yes'?'○':'△'}にしました`);
-      }
-      const beforeRe = /(\d{1,2})日[^。\n]*?(\d{1,2})時(?:(\d{1,2})分)?まで[^。\n]*(行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)?/gi;
-      for (const m of text.matchAll(beforeRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const to = `${String(m[2]).padStart(2,'0')}:${String(m[3]||0).padStart(2,'0')}`;
-        const type = /(かも|未定|調整|可能性)/.test(m[4]||'') ? 'maybe' : 'yes';
-        fillDate(ymd(d),type,null,to); applied++; notes.push(`${m[1]}日 ${to}までを${type==='yes'?'○':'△'}にしました`);
-      }
-      const sentenceRe = /(\d{1,2})日[^。\n]*(難しい|無理|行けない|不可|×|行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)/gi;
-      for (const m of text.matchAll(sentenceRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const word = m[2];
-        if (/(難しい|無理|行けない|不可|×)/.test(word)) fillDate(ymd(d),'erase');
-        else if (/(かも|未定|調整|可能性)/.test(word)) fillDate(ymd(d),'maybe');
-        else fillDate(ymd(d),'yes');
-        applied++;
-      }
-      renderSchedule();
-      status.className = 'parse-status show ' + (applied ? 'ok':'warn');
-      status.textContent = applied
-        ? `文章を仮反映しました。${notes.slice(0,3).join('。')}。内容をご確認ください。`
-        : '文章を十分に解析できませんでした。日付と「行ける／行けるかも／行けない」、または時間帯を明記してください。';
     }
     async function saveResponse() {
       const name = $('#participantName').value.trim();
