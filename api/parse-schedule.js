@@ -1,7 +1,7 @@
-// 「言葉で日程を入力」を Gemini 1.5 Flash で構造化データに変換する API
+// 「言葉で日程を入力」を Gemini（軽量・高速モデル）で構造化データに変換する API
 // 環境変数 GEMINI_API_KEY が必要（Google AI Studio で発行）
 
-const MODEL = 'gemini-1.5-flash';
+const MODEL = 'gemini-flash-lite-latest';
 
 function isConfigured() {
   return Boolean(process.env.GEMINI_API_KEY);
