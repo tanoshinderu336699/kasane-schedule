@@ -90,6 +90,14 @@
     .past-project-name { font-size: 13.5px; font-weight: 800; }
     .past-project-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
     .past-project-open { flex: none; }
+    .past-project-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+    .past-project-delete {
+      flex: none; width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--line);
+      background: #fff; color: #a6353f; font-weight: 800; font-size: 15px; line-height: 1;
+      display: grid; place-items: center; transition: .15s ease;
+    }
+    .past-project-delete:hover { background: #fff0f1; border-color: #f3c7cb; }
+    .past-project-delete:disabled { opacity: .5; cursor: default; }
     @media (max-width: 560px) {
       h1 { font-size: 30px; }
       .field-row { grid-template-columns: 1fr; }
@@ -216,7 +224,7 @@
 
     <div class="card" id="pastProjectsCard" style="display:none">
       <h2 class="card-title">過去に作成したプロジェクト</h2>
-      <div class="card-sub">あなたのGoogleアカウントで作成したプロジェクトの一覧です（最新50件）。</div>
+      <div class="card-sub">あなたのGoogleアカウントで作成したプロジェクトの一覧です（最新50件）。一覧から消したいだけの場合は「×」で削除できます。</div>
       <div id="pastProjectsList" class="past-projects-list"></div>
       <div class="helper" id="pastProjectsEmpty" style="display:none">まだ作成したプロジェクトはありません。</div>
     </div>
@@ -224,6 +232,7 @@
   <div class="toast" id="toast"></div>
   <script>
     const $ = (q) => document.querySelector(q);
+    const $$ = (q, root = document) => Array.from(root.querySelectorAll(q));
     function showToast(message) {
       const el = $('#toast');
       el.textContent = message;
@@ -342,16 +351,46 @@
         }
         empty.style.display = 'none';
         list.innerHTML = projects.map(p => `
-          <div class="past-project-item">
+          <div class="past-project-item" data-id="${escapeHtml(p.id)}">
             <div>
               <div class="past-project-name">${escapeHtml(p.name || '名称未設定プロジェクト')}</div>
               <div class="past-project-date">${escapeHtml(formatDateTime(p.createdAt))}</div>
             </div>
-            <a class="btn btn-secondary past-project-open" href="./app.html?id=${encodeURIComponent(p.id)}&token=${encodeURIComponent(p.token)}">開く</a>
+            <div class="past-project-actions">
+              <a class="btn btn-secondary past-project-open" href="./app.html?id=${encodeURIComponent(p.id)}&token=${encodeURIComponent(p.token)}">開く</a>
+              <button type="button" class="past-project-delete" data-delete-id="${escapeHtml(p.id)}" title="一覧から削除" aria-label="一覧から削除">×</button>
+            </div>
           </div>
         `).join('');
+        $$('[data-delete-id]', list).forEach(btn => {
+          btn.addEventListener('click', () => deletePastProject(btn.dataset.deleteId, btn));
+        });
       } catch (e) {
         // 一覧取得に失敗しても致命的ではないため、静かに無視
+      }
+    }
+
+    async function deletePastProject(id, btn) {
+      if (!id) return;
+      const item = btn.closest('.past-project-item');
+      const name = item ? item.querySelector('.past-project-name').textContent : 'このプロジェクト';
+      if (!window.confirm(`「${name}」を一覧から削除しますか？（プロジェクト自体が残っている場合は、この操作では削除されません）`)) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/user/projects', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || '削除に失敗しました');
+        if (item) item.remove();
+        const list = $('#pastProjectsList');
+        if (!list.children.length) $('#pastProjectsEmpty').style.display = '';
+        showToast('一覧から削除しました');
+      } catch (e) {
+        btn.disabled = false;
+        showToast(e.message || '削除に失敗しました');
       }
     }
 
