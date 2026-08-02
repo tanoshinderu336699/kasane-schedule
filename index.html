@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#f7f4ef" />
   <title>KASANE｜美しい日程調整</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg: #f7f4ef;
@@ -77,6 +78,18 @@
     .error-box.show { display: block; }
     .toast { position: fixed; right: 20px; bottom: 24px; z-index: 80; background: #171e2a; color: #fff; padding: 13px 16px; border-radius: 14px; box-shadow: 0 18px 48px rgba(22,30,44,.24); font-size: 13px; font-weight: 700; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .22s ease; }
     .toast.show { opacity: 1; transform: translateY(0); }
+    .user-row { display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e6e2dc; object-fit: cover; }
+    .user-name { font-size: 14px; font-weight: 800; }
+    .user-email { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .past-projects-list { display: grid; gap: 10px; }
+    .past-project-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; background: #fbfaf8;
+    }
+    .past-project-name { font-size: 13.5px; font-weight: 800; }
+    .past-project-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .past-project-open { flex: none; }
     @media (max-width: 560px) {
       h1 { font-size: 30px; }
       .field-row { grid-template-columns: 1fr; }
@@ -182,6 +195,31 @@
         <div class="step"><span class="step-num">3</span>管理用URLを開くと、設定変更・重なり分析・文章出力・回答の初期化ができます。</div>
       </div>
     </div>
+
+    <div class="card" id="loginCard">
+      <h2 class="card-title">Googleでログイン（任意）</h2>
+      <div class="card-sub" id="loginCardSub">ログインは必須ではありません。ログインすると、過去に作成したプロジェクトの一覧をこの画面の下部で確認できるようになります。</div>
+      <div id="loggedOutArea">
+        <div id="googleSignInBtn"></div>
+      </div>
+      <div id="loggedInArea" style="display:none">
+        <div class="user-row">
+          <img class="user-avatar" id="userAvatar" alt="" />
+          <div>
+            <div class="user-name" id="userName"></div>
+            <div class="user-email" id="userEmail"></div>
+          </div>
+          <button class="btn btn-secondary" id="logoutBtn" style="margin-left:auto">ログアウト</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="pastProjectsCard" style="display:none">
+      <h2 class="card-title">過去に作成したプロジェクト</h2>
+      <div class="card-sub">あなたのGoogleアカウントで作成したプロジェクトの一覧です（最新50件）。</div>
+      <div id="pastProjectsList" class="past-projects-list"></div>
+      <div class="helper" id="pastProjectsEmpty" style="display:none">まだ作成したプロジェクトはありません。</div>
+    </div>
   </main>
   <div class="toast" id="toast"></div>
   <script>
@@ -248,6 +286,7 @@
         $('#formArea').style.display = 'none';
         $('#resultArea').classList.add('show');
         showToast('プロジェクトを作成しました');
+        if ($('#pastProjectsCard').style.display !== 'none') loadPastProjects();
       } catch (e) {
         errorBox.textContent = e.message || '作成に失敗しました。時間をおいて再度お試しください。';
         errorBox.classList.add('show');
@@ -262,6 +301,121 @@
     $('#openBtn').addEventListener('click', () => {
       if (created) location.href = `${location.origin}/app.html?id=${created.id}&token=${created.token}`;
     });
+
+    // ── Googleログイン ──────────────────────────────
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+    }
+    function formatDateTime(iso) {
+      try { return new Date(iso).toLocaleString('ja-JP'); } catch (e) { return ''; }
+    }
+
+    function showLoggedOut() {
+      $('#loggedOutArea').style.display = '';
+      $('#loggedInArea').style.display = 'none';
+      $('#pastProjectsCard').style.display = 'none';
+    }
+
+    function showLoggedIn(user) {
+      $('#loggedOutArea').style.display = 'none';
+      $('#loggedInArea').style.display = '';
+      $('#userName').textContent = user.name || '';
+      $('#userEmail').textContent = user.email || '';
+      const avatar = $('#userAvatar');
+      if (user.picture) { avatar.src = user.picture; avatar.style.display = ''; }
+      else { avatar.style.display = 'none'; }
+      loadPastProjects();
+    }
+
+    async function loadPastProjects() {
+      try {
+        const res = await fetch('/api/user/projects');
+        const data = await res.json().catch(() => ({}));
+        const list = $('#pastProjectsList');
+        const empty = $('#pastProjectsEmpty');
+        const projects = data.projects || [];
+        $('#pastProjectsCard').style.display = '';
+        if (!projects.length) {
+          list.innerHTML = '';
+          empty.style.display = '';
+          return;
+        }
+        empty.style.display = 'none';
+        list.innerHTML = projects.map(p => `
+          <div class="past-project-item">
+            <div>
+              <div class="past-project-name">${escapeHtml(p.name || '名称未設定プロジェクト')}</div>
+              <div class="past-project-date">${escapeHtml(formatDateTime(p.createdAt))}</div>
+            </div>
+            <a class="btn btn-secondary past-project-open" href="./app.html?id=${encodeURIComponent(p.id)}&token=${encodeURIComponent(p.token)}">開く</a>
+          </div>
+        `).join('');
+      } catch (e) {
+        // 一覧取得に失敗しても致命的ではないため、静かに無視
+      }
+    }
+
+    async function checkSession() {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json().catch(() => ({}));
+        if (data.user) showLoggedIn(data.user);
+        else showLoggedOut();
+      } catch (e) {
+        showLoggedOut();
+      }
+    }
+
+    async function handleGoogleCredential(response) {
+      try {
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'ログインに失敗しました');
+        showLoggedIn(data.user);
+        showToast('ログインしました');
+      } catch (e) {
+        showToast(e.message || 'ログインに失敗しました');
+      }
+    }
+
+    $('#logoutBtn').addEventListener('click', async () => {
+      try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+      showLoggedOut();
+      showToast('ログアウトしました');
+    });
+
+    async function initGoogleLogin() {
+      try {
+        const res = await fetch('/api/config');
+        const data = await res.json().catch(() => ({}));
+        const clientId = data.googleClientId;
+        if (!clientId) {
+          $('#loginCardSub').textContent = 'Googleログインは現在準備中です。';
+          $('#googleSignInBtn').style.display = 'none';
+          return;
+        }
+        if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+          // GISスクリプトの読み込みが間に合っていない場合は少し待って再試行
+          setTimeout(initGoogleLogin, 300);
+          return;
+        }
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredential
+        });
+        window.google.accounts.id.renderButton($('#googleSignInBtn'), {
+          type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 280
+        });
+        checkSession();
+      } catch (e) {
+        $('#loginCardSub').textContent = 'Googleログインは現在準備中です。';
+      }
+    }
+    initGoogleLogin();
   </script>
 </body>
 </html>
