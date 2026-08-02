@@ -14,14 +14,9 @@
       --muted: #737b87;
       --line: #e6e2dc;
       --line-strong: #d7d1c8;
-      --yes: #e76068;
-      --yes-soft: #fff0f1;
-      --maybe: #4f7cff;
-      --maybe-soft: #eef3ff;
       --accent: #161e2c;
       --gold: #b49361;
       --success: #2f8f70;
-      --warning: #a06c16;
       --shadow: 0 20px 60px rgba(42, 49, 60, .10);
       --shadow-soft: 0 10px 30px rgba(42, 49, 60, .07);
       --radius-xl: 28px;
@@ -43,549 +38,154 @@
     }
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; }
-    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-      outline: 3px solid rgba(79,124,255,.24);
-      outline-offset: 2px;
-    }
-    .app { min-height: 100vh; }
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      backdrop-filter: blur(18px);
-      background: rgba(247,244,239,.82);
-      border-bottom: 1px solid rgba(215,209,200,.7);
-    }
-    .topbar-inner {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 190px; }
-    .brand-mark {
-      width: 40px; height: 40px; border-radius: 14px;
-      display: grid; place-items: center;
-      background: linear-gradient(145deg, #101722, #2b3545);
-      color: white;
-      box-shadow: 0 8px 24px rgba(22,30,44,.22);
-      font-weight: 800;
-      letter-spacing: -.04em;
-    }
+    button:focus-visible, input:focus-visible { outline: 3px solid rgba(79,124,255,.24); outline-offset: 2px; }
+    .topbar { position: sticky; top: 0; z-index: 30; backdrop-filter: blur(18px); background: rgba(247,244,239,.82); border-bottom: 1px solid rgba(215,209,200,.7); }
+    .topbar-inner { max-width: 900px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(145deg, #101722, #2b3545); color: white; box-shadow: 0 8px 24px rgba(22,30,44,.22); font-weight: 800; letter-spacing: -.04em; }
     .brand-name { font-size: 17px; font-weight: 800; letter-spacing: .15em; }
     .brand-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-      padding: 5px;
-      background: rgba(255,255,255,.64);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      margin-left: auto;
-    }
-    .nav-tab {
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .nav-tab.active { background: var(--surface-strong); color: var(--ink); box-shadow: var(--shadow-soft); }
-    .account {
-      display: flex; align-items: center; gap: 10px;
-      padding: 6px 10px 6px 6px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.72);
-      border-radius: 999px;
-    }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #e9e3da; display: grid; place-items:center; font-weight:800; }
-    .account-text { font-size: 12px; line-height: 1.2; }
-    .account-text strong { display:block; font-size: 13px; }
-    .main { max-width: 1440px; margin: 0 auto; padding: 30px 24px 100px; }
-    .view { display: none; }
-    .view.active { display: block; }
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0,1.2fr) minmax(320px,.8fr);
-      gap: 24px;
-      align-items: stretch;
-      margin-bottom: 24px;
-    }
-    .hero-card, .card {
-      background: var(--surface);
-      border: 1px solid rgba(255,255,255,.9);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius-xl);
-      backdrop-filter: blur(18px);
-    }
-    .hero-card { padding: 34px; position: relative; overflow:hidden; }
-    .hero-card::after {
-      content:"";
-      position:absolute; width:230px; height:230px; border-radius:50%;
-      right:-80px; top:-70px;
-      background: linear-gradient(145deg, rgba(231,96,104,.16), rgba(79,124,255,.12));
-      filter: blur(2px);
-    }
-    .eyebrow { color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-    h1, h2, h3, p { margin-top: 0; }
-    h1 { font-size: clamp(30px,4vw,52px); line-height: 1.12; letter-spacing: -.04em; margin: 14px 0 16px; max-width: 850px; }
-    .hero-lead { color: var(--muted); font-size: 16px; line-height: 1.9; max-width: 760px; margin-bottom: 26px; }
-    .hero-actions { display:flex; flex-wrap:wrap; gap:12px; }
-    .btn {
-      border: 0;
-      min-height: 46px;
-      border-radius: 13px;
-      padding: 0 17px;
-      font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
-    }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-primary { background: var(--accent); color:#fff; box-shadow: 0 10px 24px rgba(22,30,44,.18); }
-    .btn-secondary { background:#fff; color:var(--ink); border:1px solid var(--line); }
-    .btn-ghost { background: transparent; color:var(--muted); border:1px solid var(--line); }
-    .btn-yes { background: var(--yes); color:#fff; }
-    .btn-maybe { background: var(--maybe); color:#fff; }
-    .btn-danger { background:#fff4f4; color:#b33a44; border:1px solid #ffd4d6; }
-    .btn-small { min-height: 38px; padding: 0 13px; font-size: 13px; }
-    .stats-card { padding: 24px; display:grid; gap:14px; }
-    .mini-stat { padding: 18px; background: rgba(255,255,255,.72); border:1px solid var(--line); border-radius: 18px; }
-    .mini-stat-label { font-size:12px; color:var(--muted); margin-bottom:8px; }
-    .mini-stat-value { font-weight:900; font-size:30px; letter-spacing:-.04em; }
-    .mini-stat-note { font-size:12px; color:var(--muted); margin-top:6px; }
-    .layout { display:grid; grid-template-columns: 360px minmax(0,1fr); gap:24px; align-items:start; }
-    .card { padding: 24px; }
-    .sticky-card { position: sticky; top: 94px; }
-    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
-    .card-title { margin:0; font-size:20px; letter-spacing:-.02em; }
-    .card-sub { color:var(--muted); font-size:13px; line-height:1.7; margin-top:6px; }
-    .section-label { margin: 24px 0 10px; font-size:12px; font-weight:800; color:var(--muted); letter-spacing:.08em; }
-    .field { display:grid; gap:8px; margin-bottom:15px; }
-    .field label { font-size:12px; font-weight:800; color:#505865; }
-    .input, .select, .textarea {
-      width:100%;
-      border:1px solid var(--line-strong);
-      background:rgba(255,255,255,.9);
-      border-radius:13px;
-      color:var(--ink);
-      padding:12px 13px;
-      min-height:46px;
-      transition:border .16s ease, box-shadow .16s ease;
-    }
-    .textarea { min-height:112px; resize:vertical; line-height:1.7; }
-    .input:focus, .select:focus, .textarea:focus { border-color:rgba(79,124,255,.62); box-shadow:0 0 0 4px rgba(79,124,255,.10); outline:0; }
-    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .helper { font-size:11px; color:var(--muted); line-height:1.6; }
-    .share-box { display:flex; gap:8px; margin-top:10px; }
-    .share-box .input { font-size:12px; }
-    .participant-header {
-      display:flex; flex-wrap:wrap; align-items:end; gap:12px;
-      margin-bottom:18px;
-    }
-    .participant-header .field { margin:0; flex:1; min-width:210px; }
-    .mode-switch {
-      display:flex; gap:8px; padding:5px; border-radius:15px;
-      background:#f2f0ec; border:1px solid var(--line);
-    }
-    .mode-btn {
-      min-width:104px; min-height:42px; border:0; border-radius:11px; background:transparent; color:var(--muted); font-weight:800;
-    }
-    .mode-btn.yes.active { color:#fff; background:var(--yes); box-shadow:0 8px 18px rgba(231,96,104,.24); }
-    .mode-btn.maybe.active { color:#fff; background:var(--maybe); box-shadow:0 8px 18px rgba(79,124,255,.24); }
-    .mode-btn.erase.active { color:#fff; background:#697280; }
-    .nl-box {
-      display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px;
-      align-items:end; margin-bottom:18px; padding:16px;
-      background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(250,248,245,.92));
-      border:1px solid var(--line); border-radius:18px;
-    }
-    .nl-box .field { margin:0; }
-    .nl-hint { color:var(--muted); font-size:12px; margin-top:7px; }
-    .parse-status { margin: 0 0 14px; padding: 12px 14px; border-radius: 13px; font-size:13px; display:none; }
-    .parse-status.show { display:block; }
-    .parse-status.ok { background:#edf8f4; color:#236c56; border:1px solid #c9eadf; }
-    .parse-status.warn { background:#fff8e9; color:#825b16; border:1px solid #f1dfb3; }
-    .schedule-wrap { overflow:auto; border:1px solid var(--line); border-radius:20px; background:#fff; }
-    .schedule-grid { display:grid; min-width:760px; user-select:none; -webkit-user-select:none; }
-    .schedule-grid .corner, .date-head, .time-cell, .slot {
-      border-right:1px solid #ece8e2;
-      border-bottom:1px solid #ece8e2;
-    }
-    .corner { position:sticky; left:0; top:0; z-index:5; background:#faf8f4; padding:14px; font-size:11px; color:var(--muted); display:flex; align-items:center; justify-content:center; }
-    .date-head { position:sticky; top:0; z-index:4; background:rgba(250,248,244,.96); padding:12px 8px; text-align:center; }
-    .date-main { font-size:14px; font-weight:900; }
-    .date-sub { font-size:11px; color:var(--muted); margin-top:4px; }
-    .date-actions { margin-top:8px; display:flex; justify-content:center; gap:5px; }
-    .tiny-btn { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:8px; min-width:29px; min-height:27px; font-size:11px; font-weight:800; }
-    .tiny-btn:hover { background:#f4f2ef; }
-    .time-cell { position:sticky; left:0; z-index:3; background:#faf8f4; padding:9px 10px; font-size:11px; color:var(--muted); text-align:right; min-height:38px; }
-    .slot { min-height:38px; position:relative; background:#fff; transition:background .08s ease, transform .08s ease; touch-action:none; }
-    .slot:hover { background:#f6f5f2; }
-    .slot.yes { background:var(--yes-soft); }
-    .slot.maybe { background:var(--maybe-soft); }
-    .slot::after { position:absolute; inset:0; display:grid; place-items:center; font-weight:900; opacity:0; transform:scale(.85); transition:.12s ease; }
-    .slot.yes::after { content:"○"; color:var(--yes); opacity:1; transform:scale(1); }
-    .slot.maybe::after { content:"△"; color:var(--maybe); opacity:1; transform:scale(1); }
-    .slot.dragging { box-shadow: inset 0 0 0 2px rgba(22,30,44,.18); }
-    .legend { display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:12px; margin:14px 2px 0; }
-    .legend-item { display:flex; align-items:center; gap:7px; }
-    .dot { width:12px; height:12px; border-radius:4px; border:1px solid var(--line); }
-    .dot.yes { background:var(--yes-soft); border-color:#f3bdc1; }
-    .dot.maybe { background:var(--maybe-soft); border-color:#c8d5ff; }
-    .action-footer { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }
-    .save-note { font-size:12px; color:var(--muted); }
-    .analysis-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:24px; }
-    .candidate-list { display:grid; gap:12px; }
-    .candidate {
-      padding:18px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.78);
-      display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center;
-    }
-    .rank { width:38px; height:38px; border-radius:13px; display:grid; place-items:center; background:#f0ece5; color:#7f6b50; font-weight:900; }
-    .candidate:first-child .rank { background:#191f2b; color:#fff; }
-    .candidate-title { font-weight:900; }
-    .candidate-meta { color:var(--muted); font-size:12px; margin-top:5px; }
-    .candidate-score { text-align:right; }
-    .candidate-score strong { font-size:22px; display:block; }
-    .score-row { display:flex; gap:7px; justify-content:flex-end; margin-top:4px; font-size:11px; }
-    .pill { border-radius:999px; padding:5px 9px; font-weight:800; }
-    .pill.yes { background:var(--yes-soft); color:#b63f47; }
-    .pill.maybe { background:var(--maybe-soft); color:#355ecb; }
-    .pill.neutral { background:#f1f0ed; color:#67707d; }
-    .heatmap-wrap { overflow:auto; border:1px solid var(--line); border-radius:18px; background:#fff; max-height:620px; }
-    .heatmap { border-collapse:separate; border-spacing:0; min-width:740px; width:100%; font-size:12px; }
-    .heatmap th, .heatmap td { border-right:1px solid #ece8e2; border-bottom:1px solid #ece8e2; padding:9px; text-align:center; }
-    .heatmap th { position:sticky; top:0; background:#faf8f4; z-index:2; }
-    .heatmap .time-col { position:sticky; left:0; background:#faf8f4; z-index:1; text-align:right; color:var(--muted); }
-    .heat-cell { min-width:86px; }
-    .heat-cell.level-0 { background:#fff; }
-    .heat-cell.level-1 { background:#fff5f5; }
-    .heat-cell.level-2 { background:#ffe7e8; }
-    .heat-cell.level-3 { background:#ffd3d5; }
-    .heat-cell.level-4 { background:#f8b6ba; }
-    .heat-cell strong { display:block; font-size:14px; }
-    .heat-cell span { color:var(--muted); font-size:10px; }
-    .participant-cards { display:grid; gap:12px; }
-    .person-card { border:1px solid var(--line); border-radius:17px; background:#fff; padding:16px; }
-    .person-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .person-name { font-weight:900; }
-    .person-meta { color:var(--muted); font-size:11px; margin-top:4px; }
-    .person-summary { margin-top:12px; color:#4f5865; font-size:12px; line-height:1.8; white-space:pre-wrap; }
-    .copy-box { width:100%; min-height:360px; border:1px solid var(--line); border-radius:18px; padding:18px; background:#fbfaf8; line-height:1.8; color:#424a56; resize:vertical; }
-    .copy-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    .empty { text-align:center; padding:44px 20px; color:var(--muted); }
-    .empty-icon { width:56px; height:56px; border-radius:19px; display:grid; place-items:center; margin:0 auto 14px; background:#f0ece5; font-size:24px; }
-    .toast {
-      position:fixed; right:20px; bottom:24px; z-index:80;
-      background:#171e2a; color:#fff; padding:13px 16px; border-radius:14px;
-      box-shadow:0 18px 48px rgba(22,30,44,.24); font-size:13px; font-weight:700;
-      opacity:0; transform:translateY(10px); pointer-events:none; transition:.22s ease;
-    }
-    .toast.show { opacity:1; transform:translateY(0); }
-    .mobile-toolbar { display:none; }
-    @media (max-width: 1020px) {
-      .hero { grid-template-columns:1fr; }
-      .layout { grid-template-columns:1fr; }
-      .sticky-card { position:static; }
-      .analysis-grid { grid-template-columns:1fr; }
-      .stats-card { grid-template-columns:repeat(3,1fr); }
-    }
-    @media (max-width: 760px) {
-      .topbar-inner { padding:12px 14px; gap:10px; }
-      .brand { min-width:0; }
-      .brand-sub, .account-text { display:none; }
-      .nav-tabs { order:3; width:100%; overflow:auto; margin:0; }
-      .topbar-inner { flex-wrap:wrap; }
-      .nav-tab { flex:1; padding:9px 11px; }
-      .account { margin-left:auto; padding:4px; }
-      .main { padding:18px 14px 120px; }
-      .hero-card, .card { border-radius:22px; }
-      .hero-card { padding:24px; }
-      h1 { font-size:34px; }
-      .stats-card { grid-template-columns:1fr; }
-      .card { padding:18px; }
-      .field-row { grid-template-columns:1fr; }
-      .participant-header { align-items:stretch; }
-      .mode-switch { width:100%; }
-      .mode-btn { flex:1; min-width:0; }
-      .nl-box { grid-template-columns:1fr; }
-      .action-footer { flex-direction:column; align-items:stretch; }
-      .action-footer .btn { width:100%; }
-      .candidate { grid-template-columns:auto 1fr; }
-      .candidate-score { grid-column:2; text-align:left; }
-      .score-row { justify-content:flex-start; }
-      .mobile-toolbar {
-        display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
-        position:fixed; left:12px; right:12px; bottom:12px; z-index:50;
-        padding:8px; border:1px solid rgba(255,255,255,.9); border-radius:18px;
-        background:rgba(255,255,255,.88); backdrop-filter:blur(18px); box-shadow:var(--shadow);
-      }
-      .mobile-tool { min-height:48px; border:0; border-radius:13px; font-weight:900; }
-      .mobile-tool.yes { background:var(--yes-soft); color:#b63f47; }
-      .mobile-tool.maybe { background:var(--maybe-soft); color:#355ecb; }
-      .mobile-tool.save { background:var(--accent); color:white; }
+    .main { max-width: 720px; margin: 0 auto; padding: 48px 20px 100px; }
+    .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .16em; color: var(--gold); text-transform: uppercase; margin-bottom: 14px; }
+    h1 { font-size: 40px; line-height: 1.25; margin: 0 0 14px; letter-spacing: -.01em; }
+    .lead { color: var(--muted); font-size: 15px; line-height: 1.8; margin: 0 0 32px; }
+    .card { background: var(--surface-strong); border: 1px solid var(--line); border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-soft); }
+    .card + .card { margin-top: 20px; }
+    .card-title { font-size: 18px; font-weight: 800; margin: 0 0 4px; }
+    .card-sub { font-size: 13px; color: var(--muted); margin: 0 0 22px; line-height: 1.7; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .input, .select { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; background: #fff; color: var(--ink); width: 100%; }
+    .input:focus, .select:focus { border-color: var(--gold); }
+    .btn { border: 0; border-radius: 999px; padding: 14px 22px; font-weight: 800; font-size: 14px; transition: .15s ease; }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 12px 28px rgba(22,30,44,.22); }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .55; cursor: default; transform: none; }
+    .btn-secondary { background: #f0ece5; color: var(--ink); }
+    .btn-block { width: 100%; }
+    .helper { font-size: 12px; color: var(--muted); line-height: 1.7; margin-top: 10px; }
+    .result { display: none; }
+    .result.show { display: block; }
+    .share-box { display: flex; gap: 8px; }
+    .share-box .input { flex: 1; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
+    .steps { display: grid; gap: 10px; margin-top: 6px; }
+    .step { display: flex; gap: 12px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .step-num { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 800; }
+    .error-box { display: none; background: #fff0f1; border: 1px solid #f3c7cb; color: #a6353f; border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; margin-bottom: 16px; }
+    .error-box.show { display: block; }
+    .toast { position: fixed; right: 20px; bottom: 24px; z-index: 80; background: #171e2a; color: #fff; padding: 13px 16px; border-radius: 14px; box-shadow: 0 18px 48px rgba(22,30,44,.24); font-size: 13px; font-weight: 700; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .22s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 560px) {
+      h1 { font-size: 30px; }
+      .field-row { grid-template-columns: 1fr; }
+      .main { padding: 32px 16px 90px; }
+      .card { padding: 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <div class="brand-mark">K</div>
-          <div>
-            <div class="brand-name">KASANE</div>
-            <div class="brand-sub">美しく、かさなる日程調整</div>
-          </div>
-        </div>
-        <nav class="nav-tabs" aria-label="メインメニュー">
-          <button class="nav-tab active" data-view="schedule">日程回答</button>
-          <button class="nav-tab" data-view="analysis">重なり分析</button>
-          <button class="nav-tab" data-view="export">文章出力</button>
-        </nav>
-        <div class="account" title="本番ではGoogleログインを使用">
-          <div class="avatar">S</div>
-          <div class="account-text"><strong>SHIN</strong>主催者</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">K</div>
+        <div>
+          <div class="brand-name">KASANE</div>
+          <div class="brand-sub">美しく、かさなる日程調整</div>
         </div>
       </div>
-    </header>
-    <main class="main">
-      <section class="hero">
-        <div class="hero-card">
-          <div class="eyebrow">Scheduling, reimagined</div>
-          <h1>みんなの予定が、<br>一番美しく重なる場所へ。</h1>
-          <p class="hero-lead">○・△を直感的に選ぶだけ。文章や音声で話しても、そのまま候補日へ反映。複雑な日程調整を、誰でも迷わず使える体験に変えます。</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" id="loadDemo">デモ回答を読み込む</button>
-            <button class="btn btn-secondary" id="resetAll">データを初期化</button>
-          </div>
-        </div>
-        <div class="stats-card hero-card">
-          <div class="mini-stat">
-            <div class="mini-stat-label">回答済み</div>
-            <div class="mini-stat-value"><span id="answeredCount">0</span><small style="font-size:14px;color:var(--muted)"> 人</small></div>
-            <div class="mini-stat-note">ログイン不要・名前だけで回答</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-label">最有力候補</div>
-            <div class="mini-stat-value" id="bestCandidateMini" style="font-size:20px;line-height:1.35">未集計</div>
-            <div class="mini-stat-note">○人数を優先して自動ランキング</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-label">共有URL</div>
-            <div class="mini-stat-value" style="font-size:18px">発行済み</div>
-            <div class="mini-stat-note">スマホ・PC・Android・iOS対応</div>
-          </div>
-        </div>
-      </section>
-      <section id="view-schedule" class="view active">
-        <div class="layout">
-          <aside class="card sticky-card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">プロジェクト設定</h2>
-                <div class="card-sub">主催者が設定する調整条件です。変更すると回答画面も自動で更新されます。</div>
-              </div>
-            </div>
-            <div class="field">
-              <label for="projectName">プロジェクト名</label>
-              <input class="input" id="projectName" value="8月チームミーティング" />
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="startDate">開始日</label>
-                <input class="input" type="date" id="startDate" value="2026-08-03" />
-              </div>
-              <div class="field">
-                <label for="endDate">終了日</label>
-                <input class="input" type="date" id="endDate" value="2026-08-07" />
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="startTime">開始時間</label>
-                <input class="input" type="time" id="startTime" value="09:00" />
-              </div>
-              <div class="field">
-                <label for="endTime">終了時間</label>
-                <input class="input" type="time" id="endTime" value="22:00" />
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="slotMinutes">回答単位</label>
-                <select class="select" id="slotMinutes">
-                  <option value="15">15分</option>
-                  <option value="30" selected>30分</option>
-                  <option value="60">60分</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="meetingMinutes">必要時間</label>
-                <select class="select" id="meetingMinutes">
-                  <option value="30">30分</option>
-                  <option value="60" selected>60分</option>
-                  <option value="90">90分</option>
-                  <option value="120">120分</option>
-                </select>
-              </div>
-            </div>
-            <button class="btn btn-primary" id="applySettings" style="width:100%">設定を反映</button>
-            <div class="section-label">共有URL</div>
-            <div class="share-box">
-              <input class="input" id="shareUrl" value="https://kasane.app/s/8aug-team" readonly />
-              <button class="btn btn-secondary btn-small" id="copyUrl">コピー</button>
-            </div>
-            <div class="helper" style="margin-top:8px">本番ではプロジェクト作成時に固有URLを自動発行します。</div>
-          </aside>
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title" id="scheduleTitle">8月チームミーティング</h2>
-                <div class="card-sub">名前を入力し、○「行ける」または△「行けるかも」を選んで、時間をタップ・ドラッグしてください。</div>
-              </div>
-            </div>
-            <div class="participant-header">
-              <div class="field">
-                <label for="participantName">あなたのお名前</label>
-                <input class="input" id="participantName" placeholder="例：田中 花子" autocomplete="name" />
-              </div>
-              <div class="mode-switch" role="group" aria-label="回答モード">
-                <button class="mode-btn yes active" data-mode="yes" aria-pressed="true">○ 行ける</button>
-                <button class="mode-btn maybe" data-mode="maybe" aria-pressed="false">△ 行けるかも</button>
-                <button class="mode-btn erase" data-mode="erase" aria-pressed="false">消す</button>
-              </div>
-            </div>
-            <div class="nl-box">
-              <div class="field">
-                <label for="naturalInput">言葉で日程を入力</label>
-                <textarea class="textarea" id="naturalInput" placeholder="例：3日と4日以外はオッケーです。6日は15時以降なら確実に行けます。"></textarea>
-                <div class="nl-hint">スマホの音声入力もそのまま使えます。反映後に必ず選択結果をご確認ください。</div>
-              </div>
-              <button class="btn btn-secondary" id="parseNatural">日程に反映</button>
-            </div>
-            <div class="parse-status" id="parseStatus"></div>
-            <div class="schedule-wrap" id="scheduleWrap">
-              <div class="schedule-grid" id="scheduleGrid"></div>
-            </div>
-            <div class="legend">
-              <div class="legend-item"><span class="dot yes"></span> ○ 行ける</div>
-              <div class="legend-item"><span class="dot maybe"></span> △ 行けるかも</div>
-              <div class="legend-item"><span class="dot"></span> 未選択・行けない</div>
-              <div class="legend-item">長押し／ドラッグで連続選択</div>
-            </div>
-            <div class="action-footer">
-              <div class="save-note">入力内容はこのブラウザ内に自動保存されます。</div>
-              <button class="btn btn-primary" id="saveResponse">この内容で回答を送信</button>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section id="view-analysis" class="view">
-        <div class="analysis-grid">
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">おすすめ候補</h2>
-                <div class="card-sub">○の人数を最優先し、△を含めた参加可能人数、連続時間の順に評価しています。</div>
-              </div>
-              <button class="btn btn-secondary btn-small" id="refreshAnalysis">再集計</button>
-            </div>
-            <div class="candidate-list" id="candidateList"></div>
-          </div>
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">参加者別の回答</h2>
-                <div class="card-sub">誰がどの日程に参加できるかを、文章でもすぐ確認できます。</div>
-              </div>
-            </div>
-            <div class="participant-cards" id="participantCards"></div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:24px">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">重なりヒートマップ</h2>
-              <div class="card-sub">色が濃いほど、○で参加できる人数が多い時間帯です。各セルには「○人数／△人数」を表示します。</div>
-            </div>
-          </div>
-          <div class="heatmap-wrap"><table class="heatmap" id="heatmap"></table></div>
-        </div>
-      </section>
-      <section id="view-export" class="view">
-        <div class="analysis-grid">
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">AI・共有用の文章出力</h2>
-                <div class="card-sub">参加者ごとの状況と候補日を、コピーしやすい文章へ自動変換します。</div>
-              </div>
-            </div>
-            <textarea class="copy-box" id="exportText" readonly></textarea>
-            <div class="copy-actions">
-              <button class="btn btn-primary" id="copyExport">全員分をコピー</button>
-              <button class="btn btn-secondary" id="downloadTxt">テキスト保存</button>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <h2 class="card-title">文章出力の使い方</h2>
-                <div class="card-sub">この文章をChatGPTなどへ貼り付けると、条件を変えた日程案をさらに検討できます。</div>
-              </div>
-            </div>
-            <div style="display:grid;gap:14px">
-              <div class="mini-stat">
-                <div class="mini-stat-label">例1</div>
-                <div style="font-weight:800;line-height:1.7">「SHIN・りょうちゃん・ユカちゃんが必須で、8人以上参加できる2時間を探して」</div>
-              </div>
-              <div class="mini-stat">
-                <div class="mini-stat-label">例2</div>
-                <div style="font-weight:800;line-height:1.7">「△を含めず、平日の午後で最も人数が多い候補を3つ出して」</div>
-              </div>
-              <div class="mini-stat">
-                <div class="mini-stat-label">例3</div>
-                <div style="font-weight:800;line-height:1.7">「全員を2グループに分けて、それぞれ最適な時間を提案して」</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-    <div class="mobile-toolbar" id="mobileToolbar">
-      <button class="mobile-tool yes" data-mobile-mode="yes">○ 行ける</button>
-      <button class="mobile-tool maybe" data-mobile-mode="maybe">△ かも</button>
-      <button class="mobile-tool save" id="mobileSave">送信</button>
     </div>
-    <div class="toast" id="toast"></div>
-  </div>
+  </header>
+  <main class="main">
+    <div class="eyebrow">Scheduling, reimagined</div>
+    <h1>誰でも、その場で主催者に。<br>ログイン不要の日程調整。</h1>
+    <p class="lead">プロジェクトを作ると、参加者用の共有URLと、主催者だけが使える管理用URLが発行されます。共有URLを送るだけで、誰でもアカウントなしに回答できます。</p>
+
+    <div class="card">
+      <h2 class="card-title">新しいプロジェクトを作成</h2>
+      <div class="card-sub">最低限、日程の範囲を入力すればすぐに始められます。あとから管理用URLで変更できます。</div>
+      <div class="error-box" id="errorBox"></div>
+      <div id="formArea">
+        <div class="field">
+          <label for="projectName">プロジェクト名</label>
+          <input class="input" id="projectName" placeholder="例：8月チームミーティング" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="startDate">開始日</label>
+            <input class="input" type="date" id="startDate" />
+          </div>
+          <div class="field">
+            <label for="endDate">終了日</label>
+            <input class="input" type="date" id="endDate" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="startTime">開始時間</label>
+            <input class="input" type="time" id="startTime" value="09:00" />
+          </div>
+          <div class="field">
+            <label for="endTime">終了時間</label>
+            <input class="input" type="time" id="endTime" value="22:00" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="slotMinutes">回答単位</label>
+            <select class="select" id="slotMinutes">
+              <option value="15">15分</option>
+              <option value="30" selected>30分</option>
+              <option value="60">60分</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="meetingMinutes">必要時間</label>
+            <select class="select" id="meetingMinutes">
+              <option value="30">30分</option>
+              <option value="60" selected>60分</option>
+              <option value="90">90分</option>
+              <option value="120">120分</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="createBtn">主催者になってプロジェクトを作成する</button>
+      </div>
+
+      <div class="result" id="resultArea">
+        <div class="badge">✓ 作成できました</div>
+        <div class="field">
+          <label for="shareUrl">参加者用の共有URL（誰でも回答できます）</label>
+          <div class="share-box">
+            <input class="input" id="shareUrl" readonly />
+            <button class="btn btn-secondary" id="copyShareUrl">コピー</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="hostUrl">管理用URL（あなただけ保存してください）</label>
+          <div class="share-box">
+            <input class="input" id="hostUrl" readonly />
+            <button class="btn btn-secondary" id="copyHostUrl">コピー</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="openBtn">プロジェクトを開く</button>
+        <div class="helper">管理用URLを失うと、設定変更や回答の初期化ができなくなります。メモやブックマークに保存しておくことをおすすめします。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">使い方</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span>プロジェクトを作成すると、共有URLと管理用URLが発行されます。</div>
+        <div class="step"><span class="step-num">2</span>共有URLを参加者に送ると、誰でもログインなしで○・△を回答できます。</div>
+        <div class="step"><span class="step-num">3</span>管理用URLを開くと、設定変更・重なり分析・文章出力・回答の初期化ができます。</div>
+      </div>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
   <script>
-    const jpWeek = ['日','月','火','水','木','金','土'];
-    const state = {
-      mode: 'yes',
-      project: {
-        name: '8月チームミーティング',
-        startDate: '2026-08-03',
-        endDate: '2026-08-07',
-        startTime: '09:00',
-        endTime: '22:00',
-        slotMinutes: 30,
-        meetingMinutes: 60
-      },
-      draft: {},
-      responses: {},
-      isDragging: false,
-      dragMode: null
-    };
-    const $ = (q, root=document) => root.querySelector(q);
-    const $$ = (q, root=document) => [...root.querySelectorAll(q)];
+    const $ = (q) => document.querySelector(q);
     function showToast(message) {
       const el = $('#toast');
       el.textContent = message;
@@ -593,456 +193,30 @@
       clearTimeout(showToast.timer);
       showToast.timer = setTimeout(() => el.classList.remove('show'), 2200);
     }
-    function toDate(value) {
-      const [y,m,d] = value.split('-').map(Number);
-      return new Date(y, m-1, d);
+    function todayStr(offset = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return d.toISOString().slice(0, 10);
     }
-    function ymd(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth()+1).padStart(2,'0');
-      const d = String(date.getDate()).padStart(2,'0');
-      return `${y}-${m}-${d}`;
-    }
-    function getDates() {
-      const start = toDate(state.project.startDate);
-      const end = toDate(state.project.endDate);
-      const dates = [];
-      const cursor = new Date(start);
-      while (cursor <= end && dates.length < 31) {
-        dates.push(new Date(cursor));
-        cursor.setDate(cursor.getDate()+1);
-      }
-      return dates;
-    }
-    function timeToMinutes(t) {
-      const [h,m] = t.split(':').map(Number);
-      return h*60+m;
-    }
-    function minutesToTime(minutes) {
-      const h = Math.floor(minutes/60);
-      const m = minutes%60;
-      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    }
-    function getTimes() {
-      const start = timeToMinutes(state.project.startTime);
-      const end = timeToMinutes(state.project.endTime);
-      const times = [];
-      for (let t=start; t<end; t+=Number(state.project.slotMinutes)) times.push(minutesToTime(t));
-      return times;
-    }
-    function key(date, time) { return `${date}|${time}`; }
-    function saveLocal() {
-      localStorage.setItem('kasane-prototype', JSON.stringify({ project:state.project, responses:state.responses }));
-    }
-    function loadLocal() {
-      try {
-        const raw = localStorage.getItem('kasane-prototype');
-        if (!raw) return;
-        const saved = JSON.parse(raw);
-        if (saved.project) state.project = saved.project;
-        if (saved.responses) state.responses = saved.responses;
-      } catch(e) {}
-    }
-    function syncInputsFromState() {
-      $('#projectName').value = state.project.name;
-      $('#startDate').value = state.project.startDate;
-      $('#endDate').value = state.project.endDate;
-      $('#startTime').value = state.project.startTime;
-      $('#endTime').value = state.project.endTime;
-      $('#slotMinutes').value = String(state.project.slotMinutes);
-      $('#meetingMinutes').value = String(state.project.meetingMinutes);
-      $('#scheduleTitle').textContent = state.project.name;
-    }
-    function setMode(mode) {
-      state.mode = mode;
-      $$('.mode-btn').forEach(btn => {
-        const active = btn.dataset.mode === mode;
-        btn.classList.toggle('active', active);
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-      });
-      $$('.mobile-tool[data-mobile-mode]').forEach(btn => {
-        btn.style.boxShadow = btn.dataset.mobileMode === mode ? 'inset 0 0 0 2px rgba(22,30,44,.25)' : 'none';
-      });
-    }
-    function renderSchedule() {
-      const dates = getDates();
-      const times = getTimes();
-      const grid = $('#scheduleGrid');
-      grid.style.gridTemplateColumns = `86px repeat(${dates.length}, minmax(112px,1fr))`;
-      grid.innerHTML = '';
-      const corner = document.createElement('div');
-      corner.className = 'corner';
-      corner.textContent = '時間';
-      grid.appendChild(corner);
-      dates.forEach(date => {
-        const dateStr = ymd(date);
-        const head = document.createElement('div');
-        head.className = 'date-head';
-        head.innerHTML = `
-          <div class="date-main">${date.getMonth()+1}/${date.getDate()}（${jpWeek[date.getDay()]}）</div>
-          <div class="date-sub">${state.project.startTime}–${state.project.endTime}</div>
-          <div class="date-actions">
-            <button class="tiny-btn" data-fill-date="${dateStr}" data-fill-type="yes" title="この日をすべて○">○</button>
-            <button class="tiny-btn" data-fill-date="${dateStr}" data-fill-type="maybe" title="この日をすべて△">△</button>
-            <button class="tiny-btn" data-fill-date="${dateStr}" data-fill-type="erase" title="この日を消去">×</button>
-          </div>`;
-        grid.appendChild(head);
-      });
-      times.forEach(time => {
-        const tc = document.createElement('div');
-        tc.className = 'time-cell';
-        tc.textContent = time;
-        grid.appendChild(tc);
-        dates.forEach(date => {
-          const dateStr = ymd(date);
-          const cell = document.createElement('div');
-          cell.className = 'slot';
-          cell.dataset.date = dateStr;
-          cell.dataset.time = time;
-          cell.dataset.key = key(dateStr,time);
-          cell.setAttribute('role','button');
-          cell.setAttribute('aria-label',`${dateStr} ${time}`);
-          const val = state.draft[cell.dataset.key];
-          if (val === 'yes' || val === 'maybe') cell.classList.add(val);
-          grid.appendChild(cell);
-        });
-      });
-      bindScheduleInteractions();
-    }
-    function applyToCell(cell, mode=state.mode) {
-      const k = cell.dataset.key;
-      if (!k) return;
-      if (mode === 'erase') delete state.draft[k];
-      else state.draft[k] = mode;
-      cell.classList.toggle('yes', state.draft[k] === 'yes');
-      cell.classList.toggle('maybe', state.draft[k] === 'maybe');
-    }
-    function bindScheduleInteractions() {
-      const grid = $('#scheduleGrid');
-      $$('.slot', grid).forEach(cell => {
-        cell.addEventListener('pointerdown', e => {
-          e.preventDefault();
-          state.isDragging = true;
-          state.dragMode = state.mode;
-          applyToCell(cell, state.dragMode);
-          cell.classList.add('dragging');
-        });
-      });
-      grid.addEventListener('pointermove', e => {
-        if (!state.isDragging) return;
-        e.preventDefault();
-        const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
-        if (target && grid.contains(target)) {
-          applyToCell(target, state.dragMode);
-          target.classList.add('dragging');
-        }
-      });
-      $$('[data-fill-date]', grid).forEach(btn => {
-        btn.addEventListener('click', () => {
-          const date = btn.dataset.fillDate;
-          const type = btn.dataset.fillType;
-          getTimes().forEach(time => {
-            const k = key(date,time);
-            if (type === 'erase') delete state.draft[k]; else state.draft[k] = type;
-          });
-          renderSchedule();
-        });
-      });
-    }
-    function normalizeJapaneseDigits(text) {
-      return text.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
-    }
-    function fillDate(dateStr, type, from=null, to=null) {
-      const times = getTimes();
-      const fromM = from ? timeToMinutes(from) : -Infinity;
-      const toM = to ? timeToMinutes(to) : Infinity;
-      times.forEach(time => {
-        const m = timeToMinutes(time);
-        if (m >= fromM && m < toM) {
-          const k = key(dateStr,time);
-          if (type === 'erase') delete state.draft[k]; else state.draft[k] = type;
-        }
-      });
-    }
-    function findDateByDay(day) {
-      return getDates().find(d => d.getDate() === Number(day));
-    }
-    function parseNaturalLanguage() {
-      let text = normalizeJapaneseDigits($('#naturalInput').value.trim());
-      const status = $('#parseStatus');
-      if (!text) {
-        status.className = 'parse-status show warn';
-        status.textContent = '日程を文章で入力してください。';
-        return;
-      }
-      let applied = 0;
-      let notes = [];
-      const dates = getDates();
-      const exceptMatch = text.match(/((?:\d{1,2}日(?:\s*(?:と|、|,|・)\s*)?)+)以外[^。\n]*(?:OK|ok|オッケー|大丈夫|行ける|可能)/i);
-      if (exceptMatch) {
-        const excluded = [...exceptMatch[1].matchAll(/(\d{1,2})日/g)].map(m => Number(m[1]));
-        dates.forEach(d => {
-          if (!excluded.includes(d.getDate())) { fillDate(ymd(d),'yes'); applied++; }
-          else fillDate(ymd(d),'erase');
-        });
-        notes.push(`${excluded.join('日・')}日を除いて○にしました`);
-      }
-      const rangeRe = /(\d{1,2})日[^。\n]*?(\d{1,2})(?:時|:)(?:(\d{1,2})分?)?\s*(?:から|〜|~|-)[^。\n]*?(\d{1,2})(?:時|:)(?:(\d{1,2})分?)?[^。\n]*(行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)/gi;
-      for (const m of text.matchAll(rangeRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const from = `${String(m[2]).padStart(2,'0')}:${String(m[3]||0).padStart(2,'0')}`;
-        const to = `${String(m[4]).padStart(2,'0')}:${String(m[5]||0).padStart(2,'0')}`;
-        const type = /(かも|未定|調整|可能性)/.test(m[6]) ? 'maybe' : 'yes';
-        fillDate(ymd(d),type,from,to); applied++; notes.push(`${m[1]}日 ${from}〜${to}を${type==='yes'?'○':'△'}にしました`);
-      }
-      const afterRe = /(\d{1,2})日[^。\n]*?(\d{1,2})時(?:(\d{1,2})分)?以降[^。\n]*(行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)?/gi;
-      for (const m of text.matchAll(afterRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const from = `${String(m[2]).padStart(2,'0')}:${String(m[3]||0).padStart(2,'0')}`;
-        const type = /(かも|未定|調整|可能性)/.test(m[4]||'') ? 'maybe' : 'yes';
-        fillDate(ymd(d),type,from,null); applied++; notes.push(`${m[1]}日 ${from}以降を${type==='yes'?'○':'△'}にしました`);
-      }
-      const beforeRe = /(\d{1,2})日[^。\n]*?(\d{1,2})時(?:(\d{1,2})分)?まで[^。\n]*(行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)?/gi;
-      for (const m of text.matchAll(beforeRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const to = `${String(m[2]).padStart(2,'0')}:${String(m[3]||0).padStart(2,'0')}`;
-        const type = /(かも|未定|調整|可能性)/.test(m[4]||'') ? 'maybe' : 'yes';
-        fillDate(ymd(d),type,null,to); applied++; notes.push(`${m[1]}日 ${to}までを${type==='yes'?'○':'△'}にしました`);
-      }
-      const sentenceRe = /(\d{1,2})日[^。\n]*(難しい|無理|行けない|不可|×|行けるかも|かも|未定|調整|可能性|行ける|OK|オッケー|大丈夫)/gi;
-      for (const m of text.matchAll(sentenceRe)) {
-        const d = findDateByDay(m[1]); if (!d) continue;
-        const word = m[2];
-        if (/(難しい|無理|行けない|不可|×)/.test(word)) fillDate(ymd(d),'erase');
-        else if (/(かも|未定|調整|可能性)/.test(word)) fillDate(ymd(d),'maybe');
-        else fillDate(ymd(d),'yes');
-        applied++;
-      }
-      renderSchedule();
-      status.className = 'parse-status show ' + (applied ? 'ok':'warn');
-      status.textContent = applied
-        ? `文章を仮反映しました。${notes.slice(0,3).join('。')}。内容をご確認ください。`
-        : '文章を十分に解析できませんでした。日付と「行ける／行けるかも／行けない」、または時間帯を明記してください。';
-    }
-    function saveResponse() {
-      const name = $('#participantName').value.trim();
-      if (!name) { showToast('お名前を入力してください'); $('#participantName').focus(); return; }
-      if (!Object.keys(state.draft).length) { showToast('参加できる日程を選択してください'); return; }
-      state.responses[name] = { name, availability: {...state.draft}, originalText: $('#naturalInput').value.trim(), updatedAt: new Date().toISOString() };
-      saveLocal();
-      updateAll();
-      showToast(`${name}さんの回答を保存しました`);
-    }
-    function formatDate(dateStr) {
-      const d = toDate(dateStr);
-      return `${d.getMonth()+1}月${d.getDate()}日（${jpWeek[d.getDay()]}）`;
-    }
-    function summarizeAvailability(availability) {
-      const dates = getDates();
-      const times = getTimes();
-      const lines = [];
-      dates.forEach(d => {
-        const ds = ymd(d);
-        const values = times.map(t => availability[key(ds,t)] || 'none');
-        const segments = [];
-        let start = 0;
-        while (start < values.length) {
-          const val = values[start];
-          let end = start+1;
-          while (end < values.length && values[end] === val) end++;
-          if (val !== 'none') {
-            const from = times[start];
-            const endMin = timeToMinutes(times[end-1]) + Number(state.project.slotMinutes);
-            const to = minutesToTime(endMin);
-            segments.push(`${from}〜${to} ${val==='yes'?'○':'△'}`);
-          }
-          start = end;
-        }
-        if (segments.length) lines.push(`${formatDate(ds)}：${segments.join('、')}`);
-      });
-      return lines.length ? lines.join('\n') : '参加可能な時間は未選択です。';
-    }
-    function calculateCandidates() {
-      const names = Object.keys(state.responses);
-      const dates = getDates();
-      const times = getTimes();
-      const slotsNeeded = Math.max(1, Math.ceil(Number(state.project.meetingMinutes)/Number(state.project.slotMinutes)));
-      const result = [];
-      dates.forEach(d => {
-        const ds = ymd(d);
-        for (let i=0; i<=times.length-slotsNeeded; i++) {
-          const block = times.slice(i,i+slotsNeeded);
-          let yes=0, maybe=0, no=0;
-          const yesNames=[], maybeNames=[], noNames=[];
-          names.forEach(name => {
-            const vals = block.map(t => state.responses[name].availability[key(ds,t)] || 'none');
-            if (vals.every(v=>v==='yes')) { yes++; yesNames.push(name); }
-            else if (vals.every(v=>v==='yes'||v==='maybe') && vals.some(v=>v==='maybe')) { maybe++; maybeNames.push(name); }
-            else { no++; noNames.push(name); }
-          });
-          const endMin = timeToMinutes(block[block.length-1]) + Number(state.project.slotMinutes);
-          result.push({ date:ds, start:block[0], end:minutesToTime(endMin), yes, maybe, no, yesNames, maybeNames, noNames, total:names.length });
-        }
-      });
-      return result.sort((a,b) => b.yes-a.yes || (b.yes+b.maybe)-(a.yes+a.maybe) || a.no-b.no || a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
-    }
-    function renderCandidates() {
-      const list = $('#candidateList');
-      const candidates = calculateCandidates().slice(0,8);
-      if (!Object.keys(state.responses).length) {
-        list.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>回答が集まると、ここに最適候補が表示されます。</div>';
-        $('#bestCandidateMini').textContent = '未集計';
-        return;
-      }
-      $('#bestCandidateMini').textContent = candidates[0] ? `${formatDate(candidates[0].date)} ${candidates[0].start}` : '候補なし';
-      list.innerHTML = candidates.map((c,i) => `
-        <div class="candidate">
-          <div class="rank">${i+1}</div>
-          <div>
-            <div class="candidate-title">${formatDate(c.date)} ${c.start}〜${c.end}</div>
-            <div class="candidate-meta">○ ${c.yesNames.join('・') || 'なし'}${c.maybeNames.length ? ` ／ △ ${c.maybeNames.join('・')}`:''}</div>
-          </div>
-          <div class="candidate-score">
-            <strong>${c.yes + c.maybe}<small style="font-size:11px;color:var(--muted)">/${c.total}人</small></strong>
-            <div class="score-row"><span class="pill yes">○ ${c.yes}</span><span class="pill maybe">△ ${c.maybe}</span></div>
-          </div>
-        </div>`).join('');
-    }
-    function renderParticipants() {
-      const wrap = $('#participantCards');
-      const entries = Object.values(state.responses);
-      if (!entries.length) {
-        wrap.innerHTML = '<div class="empty"><div class="empty-icon">人</div>まだ回答はありません。</div>';
-        return;
-      }
-      wrap.innerHTML = entries.map(p => {
-        const yes = Object.values(p.availability).filter(v=>v==='yes').length;
-        const maybe = Object.values(p.availability).filter(v=>v==='maybe').length;
-        return `<div class="person-card">
-          <div class="person-head">
-            <div><div class="person-name">${escapeHtml(p.name)}</div><div class="person-meta">○ ${yes}枠 ／ △ ${maybe}枠</div></div>
-            <button class="btn btn-ghost btn-small" data-edit-person="${escapeAttr(p.name)}">編集</button>
-          </div>
-          <div class="person-summary">${escapeHtml(summarizeAvailability(p.availability))}</div>
-        </div>`;
-      }).join('');
-      $$('[data-edit-person]').forEach(btn => btn.addEventListener('click', () => {
-        const name = btn.dataset.editPerson;
-        const p = state.responses[name];
-        state.draft = {...p.availability};
-        $('#participantName').value = name;
-        $('#naturalInput').value = p.originalText || '';
-        switchView('schedule');
-        renderSchedule();
-        showToast(`${name}さんの回答を編集できます`);
-      }));
-    }
-    function renderHeatmap() {
-      const table = $('#heatmap');
-      const names = Object.keys(state.responses);
-      const dates = getDates();
-      const times = getTimes();
-      let html = '<thead><tr><th class="time-col">時間</th>' + dates.map(d=>`<th>${d.getMonth()+1}/${d.getDate()}（${jpWeek[d.getDay()]}）</th>`).join('') + '</tr></thead><tbody>';
-      times.forEach(time => {
-        html += `<tr><td class="time-col">${time}</td>`;
-        dates.forEach(d => {
-          const ds = ymd(d);
-          let yes=0, maybe=0;
-          names.forEach(name => {
-            const v = state.responses[name].availability[key(ds,time)];
-            if (v==='yes') yes++; else if (v==='maybe') maybe++;
-          });
-          const ratio = names.length ? yes/names.length : 0;
-          const level = ratio===0?0:ratio<.25?1:ratio<.5?2:ratio<.75?3:4;
-          html += `<td class="heat-cell level-${level}" title="○ ${yes}人／△ ${maybe}人"><strong>${yes}<small style="font-size:10px"> ○</small></strong><span>${maybe} △</span></td>`;
-        });
-        html += '</tr>';
-      });
-      html += '</tbody>';
-      table.innerHTML = html;
-    }
-    function generateExportText() {
-      const candidates = calculateCandidates().slice(0,5);
-      const entries = Object.values(state.responses);
-      let out = `【プロジェクト】\n${state.project.name}\n\n【調整期間】\n${formatDate(state.project.startDate)}〜${formatDate(state.project.endDate)}\n\n【回答状況】\n回答済み ${entries.length}人\n`;
-      entries.forEach(p => {
-        out += `\n【${p.name}】\n${summarizeAvailability(p.availability)}\n`;
-        if (p.originalText) out += `本人の入力：${p.originalText}\n`;
-      });
-      out += `\n【おすすめ候補】\n`;
-      if (!candidates.length) out += '回答がまだありません。\n';
-      else candidates.forEach((c,i) => {
-        out += `第${i+1}候補：${formatDate(c.date)} ${c.start}〜${c.end}\n`;
-        out += `○ ${c.yes}人（${c.yesNames.join('、') || 'なし'}）／△ ${c.maybe}人（${c.maybeNames.join('、') || 'なし'}）／参加困難 ${c.no}人\n`;
-      });
-      return out;
-    }
-    function updateAll() {
-      $('#answeredCount').textContent = Object.keys(state.responses).length;
-      renderCandidates();
-      renderParticipants();
-      renderHeatmap();
-      $('#exportText').value = generateExportText();
-    }
-    function switchView(view) {
-      $$('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view===view));
-      $$('.view').forEach(v => v.classList.remove('active'));
-      $(`#view-${view}`).classList.add('active');
-      if (view !== 'schedule') updateAll();
-      window.scrollTo({top:0, behavior:'smooth'});
-    }
-    function loadDemoData() {
-      const names = ['SHIN','りょうちゃん','ユカちゃん','えみさん','田中さん','佐藤さん','中村さん','小林さん'];
-      const dates = getDates();
-      const times = getTimes();
-      const patterns = [
-        {start:10,end:18,maybe:[18,20]},
-        {start:9,end:17,maybe:[17,19]},
-        {start:13,end:21,maybe:[11,13]},
-        {start:9,end:15,maybe:[15,17]},
-        {start:11,end:19,maybe:[9,11]},
-        {start:14,end:22,maybe:[12,14]},
-        {start:10,end:16,maybe:[16,19]},
-        {start:9,end:14,maybe:[14,18]}
-      ];
-      state.responses = {};
-      names.forEach((name, idx) => {
-        const availability = {};
-        dates.forEach((d,di) => {
-          times.forEach(time => {
-            const hour = Number(time.split(':')[0]);
-            const p = patterns[(idx+di)%patterns.length];
-            if (hour>=p.start && hour<p.end && ((idx+di)%5!==0 || hour>=14)) availability[key(ymd(d),time)]='yes';
-            else if (hour>=p.maybe[0] && hour<p.maybe[1]) availability[key(ymd(d),time)]='maybe';
-          });
-        });
-        state.responses[name] = { name, availability, originalText:'', updatedAt:new Date().toISOString() };
-      });
-      saveLocal(); updateAll(); showToast('8人分のデモ回答を読み込みました');
-    }
-    function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
-    function escapeAttr(str) { return escapeHtml(str); }
-    function stopDragging() {
-      state.isDragging = false;
-      $$('.slot.dragging').forEach(c => c.classList.remove('dragging'));
-    }
+    $('#startDate').value = todayStr(0);
+    $('#endDate').value = todayStr(6);
+
     async function copyText(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch (_) {
+      try { await navigator.clipboard.writeText(text); }
+      catch (_) {
         const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        ta.remove();
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
       }
     }
-    function applyProjectSettings() {
-      const next = {
-        name: $('#projectName').value.trim() || '名称未設定プロジェクト',
+
+    let created = null;
+
+    $('#createBtn').addEventListener('click', async () => {
+      const errorBox = $('#errorBox');
+      errorBox.classList.remove('show');
+      const body = {
+        name: $('#projectName').value.trim(),
         startDate: $('#startDate').value,
         endDate: $('#endDate').value,
         startTime: $('#startTime').value,
@@ -1050,40 +224,44 @@
         slotMinutes: Number($('#slotMinutes').value),
         meetingMinutes: Number($('#meetingMinutes').value)
       };
-      if (toDate(next.startDate) > toDate(next.endDate)) { showToast('終了日は開始日以降にしてください'); return; }
-      if (timeToMinutes(next.startTime) >= timeToMinutes(next.endTime)) { showToast('終了時間は開始時間より後にしてください'); return; }
-      const span = (toDate(next.endDate)-toDate(next.startDate))/(1000*60*60*24);
-      if (span > 30) { showToast('プロトタイプでは最大31日までです'); return; }
-      state.project = next;
-      state.draft = {};
-      $('#scheduleTitle').textContent = next.name;
-      renderSchedule(); saveLocal(); updateAll(); showToast('プロジェクト設定を反映しました');
-    }
-    $$('.nav-tab').forEach(tab => tab.addEventListener('click', () => switchView(tab.dataset.view)));
-    $$('.mode-btn').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
-    $$('.mobile-tool[data-mobile-mode]').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mobileMode)));
-    $('#parseNatural').addEventListener('click', parseNaturalLanguage);
-    $('#saveResponse').addEventListener('click', saveResponse);
-    $('#mobileSave').addEventListener('click', saveResponse);
-    $('#applySettings').addEventListener('click', applyProjectSettings);
-    $('#copyUrl').addEventListener('click', async () => { await copyText($('#shareUrl').value); showToast('共有URLをコピーしました'); });
-    $('#copyExport').addEventListener('click', async () => { await copyText($('#exportText').value); showToast('文章をコピーしました'); });
-    $('#downloadTxt').addEventListener('click', () => {
-      const blob = new Blob([$('#exportText').value], {type:'text/plain;charset=utf-8'});
-      const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='日程調整まとめ.txt'; a.click(); URL.revokeObjectURL(a.href);
+      if (!body.startDate || !body.endDate) {
+        errorBox.textContent = '開始日と終了日を入力してください。';
+        errorBox.classList.add('show');
+        return;
+      }
+      const btn = $('#createBtn');
+      btn.disabled = true;
+      btn.textContent = '作成しています…';
+      try {
+        const res = await fetch('/api/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || '作成に失敗しました');
+        created = data;
+        const shareUrl = `${location.origin}/app.html?id=${data.id}`;
+        const hostUrl = `${location.origin}/app.html?id=${data.id}&token=${data.token}`;
+        $('#shareUrl').value = shareUrl;
+        $('#hostUrl').value = hostUrl;
+        $('#formArea').style.display = 'none';
+        $('#resultArea').classList.add('show');
+        showToast('プロジェクトを作成しました');
+      } catch (e) {
+        errorBox.textContent = e.message || '作成に失敗しました。時間をおいて再度お試しください。';
+        errorBox.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '主催者になってプロジェクトを作成する';
+      }
     });
-    $('#loadDemo').addEventListener('click', loadDemoData);
-    $('#refreshAnalysis').addEventListener('click', () => { updateAll(); showToast('最新の回答で再集計しました'); });
-    $('#resetAll').addEventListener('click', () => {
-      if (!confirm('プロトタイプ内の回答データを初期化しますか？')) return;
-      state.responses={}; state.draft={}; localStorage.removeItem('kasane-prototype'); renderSchedule(); updateAll(); showToast('データを初期化しました');
+
+    $('#copyShareUrl').addEventListener('click', async () => { await copyText($('#shareUrl').value); showToast('共有URLをコピーしました'); });
+    $('#copyHostUrl').addEventListener('click', async () => { await copyText($('#hostUrl').value); showToast('管理用URLをコピーしました'); });
+    $('#openBtn').addEventListener('click', () => {
+      if (created) location.href = `${location.origin}/app.html?id=${created.id}&token=${created.token}`;
     });
-    document.addEventListener('pointerup', stopDragging);
-    document.addEventListener('pointercancel', stopDragging);
-    loadLocal();
-    syncInputsFromState();
-    renderSchedule();
-    updateAll();
   </script>
 </body>
 </html>
