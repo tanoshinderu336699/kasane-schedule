@@ -1,4 +1,4 @@
-const { getProject, setProject, isConfigured } = require('../../lib/store');
+const { getProject, setProject, deleteProject, isConfigured } = require('../../lib/store');
 
 function toDate(value) {
   const [y, m, d] = String(value).split('-').map(Number);
@@ -71,6 +71,18 @@ module.exports = async (req, res) => {
       data.project = next;
       await setProject(id, data);
       res.status(200).json({ project: data.project, isHost: true });
+      return;
+    }
+
+    if (req.method === 'DELETE') {
+      const body = req.body || {};
+      const token = body.token || req.query.token || '';
+      if (!token || token !== data.editToken) {
+        res.status(403).json({ error: '削除権限がありません' });
+        return;
+      }
+      await deleteProject(id);
+      res.status(200).json({ deleted: true });
       return;
     }
 
