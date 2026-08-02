@@ -315,6 +315,22 @@
       background:var(--maybe-soft); color:#2f4faa; font-size:12.5px; line-height:1.6; font-weight:700;
     }
     .drag-hint .drag-hint-icon { font-size:16px; flex:none; }
+    .mode-bar {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      margin-bottom:12px; padding:10px 12px; border-radius:14px;
+      background:#f7f6f3; border:1px solid var(--line);
+    }
+    .mode-bar-label { font-size:12px; font-weight:800; color:var(--muted); flex:none; }
+    .mode-bar-btns { display:flex; gap:8px; flex-wrap:wrap; }
+    .mode-btn {
+      border:2px solid transparent; border-radius:12px; min-height:40px; padding:0 16px;
+      font-weight:800; font-size:13.5px; background:#fff; color:var(--muted);
+      display:inline-flex; align-items:center; gap:6px; touch-action:manipulation;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+    }
+    .mode-btn:active { transform: translateY(1px); }
+    .mode-btn-yes.active { background:var(--yes); color:#fff; border-color:var(--yes); box-shadow:0 6px 16px rgba(231,96,104,.28); }
+    .mode-btn-maybe.active { background:var(--maybe); color:#fff; border-color:var(--maybe); box-shadow:0 6px 16px rgba(79,124,255,.28); }
     .scroll-hint { font-size:11px; color:var(--muted); margin:8px 2px 0; display:none; }
     .danger-zone { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
     .danger-zone .section-label { color:#b33a44; }
@@ -562,9 +578,16 @@
             <div class="drag-hint">
               <span class="drag-hint-icon">👆</span>
               <span>
-                マスを「タップ」するたびに、未選択 → ○（行ける） → △（行けるかも） → 未選択 の順に切り替わります。<br>
+                下の○／△ボタンでモードを選んでからマスをタップすると、必要な時間ぶんまとめて選択されます。もう一度タップすると解除されます。<br>
                 日にちの見出し下にある○／△／×ボタンを押すと、その日全体をまとめて選択・消去できます。
               </span>
+            </div>
+            <div class="mode-bar">
+              <span class="mode-bar-label">タップで選ぶ内容</span>
+              <div class="mode-bar-btns">
+                <button type="button" class="mode-btn mode-btn-yes" id="modeBtnYes">○ 行ける</button>
+                <button type="button" class="mode-btn mode-btn-maybe" id="modeBtnMaybe">△ 行けるかも</button>
+              </div>
             </div>
             <div class="parse-status" id="parseStatus"></div>
             <div class="schedule-wrap" id="scheduleWrap">
@@ -726,6 +749,9 @@
       return times;
     }
     function key(date, time) { return `${date}|${time}`; }
+    function getSlotsNeeded() {
+      return Math.max(1, Math.ceil(Number(state.project.meetingMinutes)/Number(state.project.slotMinutes)));
+    }
     async function apiGetProject() {
       const url = `/api/project/${PROJECT_ID}` + (HOST_TOKEN ? `?token=${encodeURIComponent(HOST_TOKEN)}` : '');
       const res = await fetch(url);
@@ -943,14 +969,37 @@
       if (!wrap || !hint) return;
       hint.style.display = wrap.scrollWidth > wrap.clientWidth + 4 ? 'block' : 'none';
     }
+    function setMode(mode) {
+      state.mode = mode === 'maybe' ? 'maybe' : 'yes';
+      updateModeButtons();
+    }
+    function updateModeButtons() {
+      const yesBtn = $('#modeBtnYes');
+      const maybeBtn = $('#modeBtnMaybe');
+      if (yesBtn) yesBtn.classList.toggle('active', state.mode === 'yes');
+      if (maybeBtn) maybeBtn.classList.toggle('active', state.mode === 'maybe');
+    }
     function toggleCell(cell) {
       const k = cell.dataset.key;
       if (!k) return;
-      const current = state.draft[k];
-      const next = current === 'yes' ? 'maybe' : (current === 'maybe' ? 'erase' : 'yes');
+      const dateStr = cell.dataset.date;
+      const startTime = cell.dataset.time;
+      const times = getTimes();
+      const startIdx = times.indexOf(startTime);
+      if (startIdx === -1) return;
+      const slotsNeeded = getSlotsNeeded();
+      const blockTimes = times.slice(startIdx, startIdx + slotsNeeded);
+      const blockKeys = blockTimes.map(t => key(dateStr, t));
+      const mode = state.mode === 'maybe' ? 'maybe' : 'yes';
+      const alreadyFilled = blockKeys.every(bk => state.draft[bk] === mode);
       beginBatch();
-      applyToCell(cell, next);
+      blockKeys.forEach(bk => {
+        recordChange(bk);
+        if (alreadyFilled) delete state.draft[bk];
+        else state.draft[bk] = mode;
+      });
       commitBatch();
+      renderSchedule();
       if (navigator.vibrate) { try { navigator.vibrate(8); } catch(_) {} }
     }
     function bindScheduleInteractions() {
@@ -1335,6 +1384,8 @@
       state.draft={}; clearUndo(); renderSchedule(); updateAll(); showToast('データを初期化しました');
     });
     $('#undoLast').addEventListener('click', undoLast);
+    $('#modeBtnYes').addEventListener('click', () => setMode('yes'));
+    $('#modeBtnMaybe').addEventListener('click', () => setMode('maybe'));
     $('#deleteProject').addEventListener('click', async () => {
       if (!isHost) { showToast('削除には管理用URLが必要です'); return; }
       if (!confirm(`「${state.project.name}」を削除しますか？\nすべての回答データも完全に削除され、元に戻せません。`)) return;
@@ -1355,6 +1406,7 @@
       if (!ok) return;
       syncInputsFromState();
       applyHostVisibility();
+      updateModeButtons();
       renderSchedule();
       updateAll();
     })();
