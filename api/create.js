@@ -50,10 +50,13 @@ module.exports = async (req, res) => {
     const id = genId(6);
     const editToken = genToken(18);
 
-    await setProject(id, { project, editToken, responses: {} });
+    // ログイン中のユーザーが作成した場合は、削除時に過去プロジェクト一覧からも
+    // 取り除けるよう、所有者のユーザーIDをプロジェクトデータ自体にも保存しておく。
+    const user = getSessionUser(req.headers.cookie);
+
+    await setProject(id, { project, editToken, responses: {}, ownerSub: user ? user.sub : null });
 
     // ログイン中のユーザーが作成した場合は、そのユーザーの過去プロジェクト一覧に追加します。
-    const user = getSessionUser(req.headers.cookie);
     if (user) {
       try {
         await addUserProject(user.sub, {
