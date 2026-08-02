@@ -179,6 +179,7 @@
     .mini-stat-value { font-weight:900; font-size:30px; letter-spacing:-.04em; }
     .mini-stat-note { font-size:12px; color:var(--muted); margin-top:6px; }
     .layout { display:grid; grid-template-columns: 360px minmax(0,1fr); gap:24px; align-items:start; }
+    .layout.guest-mode { grid-template-columns: minmax(0,1fr); }
     .card { padding: 24px; }
     .sticky-card { position: sticky; top: 94px; }
     .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
@@ -233,7 +234,10 @@
     .parse-status.show { display:block; }
     .parse-status.ok { background:#edf8f4; color:#236c56; border:1px solid #c9eadf; }
     .parse-status.warn { background:#fff8e9; color:#825b16; border:1px solid #f1dfb3; }
-    .schedule-wrap { overflow:auto; border:1px solid var(--line); border-radius:20px; background:#fff; }
+    .schedule-wrap {
+      overflow-x:auto; overflow-y:hidden; border:1px solid var(--line); border-radius:20px; background:#fff;
+      -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
+    }
     .schedule-grid { display:grid; min-width:760px; user-select:none; -webkit-user-select:none; }
     .schedule-grid .corner, .date-head, .time-cell, .slot {
       border-right:1px solid #ece8e2;
@@ -247,7 +251,7 @@
     .tiny-btn { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:8px; min-width:29px; min-height:27px; font-size:11px; font-weight:800; }
     .tiny-btn:hover { background:#f4f2ef; }
     .time-cell { position:sticky; left:0; z-index:3; background:#faf8f4; padding:9px 10px; font-size:11px; color:var(--muted); text-align:right; min-height:38px; }
-    .slot { min-height:38px; position:relative; background:#fff; transition:background .08s ease, transform .08s ease; touch-action:none; }
+    .slot { min-height:38px; position:relative; background:#fff; transition:background .08s ease, transform .08s ease; touch-action:pan-x; }
     .slot:hover { background:#f6f5f2; }
     .slot.yes { background:var(--yes-soft); }
     .slot.maybe { background:var(--maybe-soft); }
@@ -365,37 +369,61 @@
       .brand-sub, .account-text { display:none; }
       .nav-tabs { order:3; width:100%; overflow:auto; margin:0; }
       .topbar-inner { flex-wrap:wrap; }
-      .nav-tab { flex:1; padding:9px 11px; }
+      .nav-tab { flex:1; padding:9px 11px; font-size:13px; }
       .account { margin-left:auto; padding:4px; }
-      .main { padding:18px 14px 120px; }
+      .main { padding:16px 12px 120px; max-width:100%; }
       .hero-card, .card { border-radius:22px; }
-      .hero-card { padding:24px; }
-      h1 { font-size:34px; }
-      .stats-card { grid-template-columns:1fr; }
-      .card { padding:18px; }
+      .hero-card { padding:20px; }
+      h1 { font-size:28px; }
+      .hero-lead { font-size:14px; line-height:1.75; }
+      .stats-card { grid-template-columns:1fr; padding:16px; gap:10px; }
+      .mini-stat { padding:14px; }
+      .mini-stat-value { font-size:24px; }
+      .card { padding:16px; }
+      .card-head { flex-wrap:wrap; }
+      .card-title { font-size:18px; }
       .field-row { grid-template-columns:1fr; }
       .participant-header { align-items:stretch; }
+      .participant-header .field { min-width:0; }
       .mode-switch { width:100%; }
-      .mode-btn { flex:1; min-width:0; }
-      .nl-box { grid-template-columns:1fr; }
+      .mode-btn { flex:1; min-width:0; padding:0 6px; font-size:13px; }
+      .nl-box { grid-template-columns:1fr; padding:14px; }
+      .nl-box #parseNatural { width:100%; }
       .action-footer { flex-direction:column; align-items:stretch; }
       .action-footer .btn { width:100%; }
       .candidate { grid-template-columns:auto 1fr; }
       .candidate-score { grid-column:2; text-align:left; }
       .score-row { justify-content:flex-start; }
+      .schedule-grid { min-width:640px; }
+      .date-head { padding:9px 5px; }
+      .date-main { font-size:12.5px; }
+      .date-sub { font-size:10px; }
+      .time-cell { font-size:10.5px; padding:8px 6px; }
       .mobile-toolbar {
         display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
         position:fixed; left:12px; right:12px; bottom:12px; z-index:50;
         padding:8px; border:1px solid rgba(255,255,255,.9); border-radius:18px;
         background:rgba(255,255,255,.88); backdrop-filter:blur(18px); box-shadow:var(--shadow);
       }
-      .mobile-tool { min-height:48px; border:0; border-radius:13px; font-weight:900; }
+      .mobile-tool { min-height:48px; border:0; border-radius:13px; font-weight:900; font-size:13px; }
       .mobile-tool.yes { background:var(--yes-soft); color:#b63f47; }
       .mobile-tool.maybe { background:var(--maybe-soft); color:#355ecb; }
       .mobile-tool.save { background:var(--accent); color:white; }
       .modal { padding:20px; border-radius:20px; }
       .modal-head h2 { font-size:17px; }
       .danger-zone .btn { width:100%; }
+      .share-box .input { font-size:13px; }
+    }
+    @media (max-width: 400px) {
+      .main { padding:14px 10px 120px; }
+      .hero-card { padding:16px; }
+      h1 { font-size:24px; }
+      .card { padding:13px; }
+      .card-title { font-size:16.5px; }
+      .schedule-grid { min-width:560px; }
+      .corner, .time-cell { min-width:60px; }
+      .btn { padding:0 12px; font-size:13.5px; }
+      .drag-hint { font-size:11.5px; padding:9px 11px; }
     }
   </style>
 </head>
@@ -422,7 +450,7 @@
       </div>
     </header>
     <main class="main">
-      <section class="hero">
+      <section class="hero" id="heroSection">
         <div class="hero-card">
           <div class="eyebrow">Scheduling, reimagined</div>
           <h1>みんなの予定が、<br>一番美しく重なる場所へ。</h1>
@@ -455,7 +483,7 @@
       </section>
       <section id="view-schedule" class="view active">
         <div class="layout">
-          <aside class="card sticky-card">
+          <aside class="card sticky-card" id="settingsCard">
             <div class="card-head">
               <div>
                 <h2 class="card-title">プロジェクト設定</h2>
@@ -829,6 +857,15 @@
       $$('.host-only').forEach(el => { el.style.display = isHost ? '' : 'none'; });
       const guestActions = $('#guestActions');
       if (guestActions) guestActions.style.display = isHost ? 'none' : '';
+      // 参加者（共有URLからの訪問者）には「新しいプロジェクトを作る」「プロジェクト設定」
+      // 「回答済み人数」などの主催者向け情報を隠し、ミーティング名→お名前→日程入力
+      // だけのシンプルな画面から始める。
+      const heroSection = $('#heroSection');
+      if (heroSection) heroSection.style.display = isHost ? '' : 'none';
+      const settingsCard = $('#settingsCard');
+      if (settingsCard) settingsCard.style.display = isHost ? '' : 'none';
+      const layoutEl = $('.layout');
+      if (layoutEl) layoutEl.classList.toggle('guest-mode', !isHost);
       ['projectName','startDate','endDate','startTime','endTime','slotMinutes','meetingMinutes'].forEach(id => {
         const el = $('#'+id);
         if (el) el.disabled = !isHost;
