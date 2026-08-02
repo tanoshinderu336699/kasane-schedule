@@ -1,4 +1,5 @@
-const { setProject, genId, genToken, isConfigured } = require('../lib/store');
+const { setProject, genId, genToken, isConfigured, addUserProject } = require('../lib/store');
+const { getSessionUser } = require('../lib/session');
 
 const DEFAULTS = {
   name: '名称未設定プロジェクト',
@@ -50,6 +51,21 @@ module.exports = async (req, res) => {
     const editToken = genToken(18);
 
     await setProject(id, { project, editToken, responses: {} });
+
+    // ログイン中のユーザーが作成した場合は、そのユーザーの過去プロジェクト一覧に追加します。
+    const user = getSessionUser(req.headers.cookie);
+    if (user) {
+      try {
+        await addUserProject(user.sub, {
+          id,
+          token: editToken,
+          name: project.name,
+          createdAt: project.createdAt
+        });
+      } catch (e) {
+        // プロジェクト一覧への追加に失敗しても、作成自体は成功として扱う
+      }
+    }
 
     res.status(200).json({ id, token: editToken });
   } catch (e) {
