@@ -45,11 +45,17 @@
       --radius-sm: 10px;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
+    html {
+      scroll-behavior: smooth; overflow-x: hidden; width: 100%;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
     body {
       margin: 0;
       overflow-x: hidden;
       width: 100%;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
       color: var(--ink);
       background:
         radial-gradient(circle at 8% 0%, rgba(180,147,97,.12), transparent 30%),
@@ -233,15 +239,15 @@
       border-right:1px solid #ece8e2;
       border-bottom:1px solid #ece8e2;
     }
-    .corner { position:sticky; left:0; top:0; z-index:5; background:#faf8f4; padding:14px; font-size:11px; color:var(--muted); display:flex; align-items:center; justify-content:center; }
-    .date-head { position:sticky; top:0; z-index:4; background:rgba(250,248,244,.96); padding:12px 8px; text-align:center; }
+    .corner { position:sticky; left:0; top:0; z-index:5; background:#faf8f4; padding:14px; font-size:11px; color:var(--muted); display:flex; align-items:center; justify-content:center; touch-action:manipulation; }
+    .date-head { position:sticky; top:0; z-index:4; background:rgba(250,248,244,.96); padding:12px 8px; text-align:center; touch-action:manipulation; }
     .date-main { font-size:14px; font-weight:900; }
     .date-sub { font-size:11px; color:var(--muted); margin-top:4px; }
     .date-actions { margin-top:8px; display:flex; justify-content:center; gap:5px; }
-    .tiny-btn { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:8px; min-width:29px; min-height:27px; font-size:11px; font-weight:800; }
+    .tiny-btn { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:8px; min-width:29px; min-height:27px; font-size:11px; font-weight:800; touch-action:manipulation; }
     .tiny-btn:hover { background:#f4f2ef; }
-    .time-cell { position:sticky; left:0; z-index:3; background:#faf8f4; padding:9px 10px; font-size:11px; color:var(--muted); text-align:right; min-height:46px; }
-    .slot { min-height:46px; position:relative; background:#fff; transition:background .08s ease, transform .08s ease; touch-action:pan-x pan-y; -webkit-touch-callout:none; }
+    .time-cell { position:sticky; left:0; z-index:3; background:#faf8f4; padding:9px 10px; font-size:11px; color:var(--muted); text-align:right; min-height:46px; touch-action:manipulation; }
+    .slot { min-height:46px; position:relative; background:#fff; transition:background .08s ease, transform .08s ease; touch-action:manipulation; -webkit-touch-callout:none; cursor:pointer; }
     .slot:hover { background:#f6f5f2; }
     .slot.yes { background:var(--yes-soft); }
     .slot.maybe { background:var(--maybe-soft); }
@@ -418,8 +424,8 @@
         </div>
         <nav class="nav-tabs" aria-label="メインメニュー">
           <button class="nav-tab active" data-view="schedule">日程回答</button>
-          <button class="nav-tab" data-view="analysis">重なり分析</button>
-          <button class="nav-tab" data-view="export">文章出力</button>
+          <button class="nav-tab host-only" data-view="analysis" style="display:none">重なり分析</button>
+          <button class="nav-tab host-only" data-view="export" style="display:none">文章出力</button>
         </nav>
         <div class="account" id="accountBadge" title="">
           <div class="avatar" id="accountAvatar">-</div>
@@ -536,7 +542,7 @@
             <div class="card-head">
               <div>
                 <h2 class="card-title" id="scheduleTitle">8月チームミーティング</h2>
-                <div class="card-sub">お名前を入力し、行ける時間のマスを「長押し」して○をつけてください。</div>
+                <div class="card-sub">お名前を入力し、行ける時間のマスを「タップ」して○や△をつけてください。</div>
               </div>
             </div>
             <div class="participant-header">
@@ -556,9 +562,8 @@
             <div class="drag-hint">
               <span class="drag-hint-icon">👆</span>
               <span>
-                マスを「長押し」すると○がつきます。長押ししたまま上下左右になぞると、範囲をまとめて選択できます。<br>
-                すでに○がついているマスを長押しすると、消すことができます。<br>
-                時間の青いマス部分を指で左右になぞると、日にちを移動できます。
+                マスを「タップ」するたびに、未選択 → ○（行ける） → △（行けるかも） → 未選択 の順に切り替わります。<br>
+                日にちの見出し下にある○／△／×ボタンを押すと、その日全体をまとめて選択・消去できます。
               </span>
             </div>
             <div class="parse-status" id="parseStatus"></div>
@@ -570,7 +575,7 @@
               <div class="legend-item"><span class="dot yes"></span> ○ 行ける</div>
               <div class="legend-item"><span class="dot maybe"></span> △ 行けるかも</div>
               <div class="legend-item"><span class="dot"></span> 未選択・行けない</div>
-              <div class="legend-item">長押し／ドラッグで連続選択</div>
+              <div class="legend-item">タップで選択・切り替え</div>
             </div>
             <div class="action-footer">
               <div class="save-note">「回答を送信」を押すとサーバーに保存され、共有URLを知る全員に公開されます。</div>
@@ -672,8 +677,6 @@
       },
       draft: {},
       responses: {},
-      isDragging: false,
-      dragMode: null,
       pendingBatch: null,
       undoBatch: null
     };
@@ -694,8 +697,7 @@
       const y = date.getFullYear();
       const m = String(date.getMonth()+1).padStart(2,'0');
       const d = String(date.getDate()).padStart(2,'0');
-      return `${y}-${m}-${d}`;
-    }
+      return `${y}-${m}-${d}`;    }
     function getDates() {
       const start = toDate(state.project.startDate);
       const end = toDate(state.project.endDate);
@@ -941,44 +943,20 @@
       if (!wrap || !hint) return;
       hint.style.display = wrap.scrollWidth > wrap.clientWidth + 4 ? 'block' : 'none';
     }
-    const LONG_PRESS_MS = 380;
-    const MOVE_CANCEL_PX = 10;
-    function cancelLongPress() {
-      clearTimeout(state.longPressTimer);
-      state.longPressTimer = null;
+    function toggleCell(cell) {
+      const k = cell.dataset.key;
+      if (!k) return;
+      const current = state.draft[k];
+      const next = current === 'yes' ? 'maybe' : (current === 'maybe' ? 'erase' : 'yes');
+      beginBatch();
+      applyToCell(cell, next);
+      commitBatch();
+      if (navigator.vibrate) { try { navigator.vibrate(8); } catch(_) {} }
     }
     function bindScheduleInteractions() {
       const grid = $('#scheduleGrid');
       $$('.slot', grid).forEach(cell => {
-        cell.addEventListener('pointerdown', e => {
-          cancelLongPress();
-          state.longPressStartX = e.clientX;
-          state.longPressStartY = e.clientY;
-          state.longPressTimer = setTimeout(() => {
-            state.longPressTimer = null;
-            state.isDragging = true;
-            const current = state.draft[cell.dataset.key];
-            state.dragMode = current === 'yes' ? 'erase' : 'yes';
-            beginBatch();
-            applyToCell(cell, state.dragMode);
-            cell.classList.add('dragging');
-            if (navigator.vibrate) { try { navigator.vibrate(12); } catch(_) {} }
-          }, LONG_PRESS_MS);
-        });
-      });
-      grid.addEventListener('pointermove', e => {
-        if (state.longPressTimer && !state.isDragging) {
-          const dx = e.clientX - state.longPressStartX;
-          const dy = e.clientY - state.longPressStartY;
-          if (Math.sqrt(dx*dx + dy*dy) > MOVE_CANCEL_PX) cancelLongPress();
-        }
-        if (!state.isDragging) return;
-        e.preventDefault();
-        const target = document.elementFromPoint(e.clientX, e.clientY)?.closest('.slot');
-        if (target && grid.contains(target)) {
-          applyToCell(target, state.dragMode);
-          target.classList.add('dragging');
-        }
+        cell.addEventListener('click', () => toggleCell(cell));
       });
       $$('[data-fill-date]', grid).forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1284,6 +1262,7 @@
       $('#exportText').value = generateExportText();
     }
     function switchView(view) {
+      if (!isHost && view !== 'schedule') return;
       $$('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view===view));
       $$('.view').forEach(v => v.classList.remove('active'));
       $(`#view-${view}`).classList.add('active');
@@ -1299,12 +1278,6 @@
     }
     function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
     function escapeAttr(str) { return escapeHtml(str); }
-    function stopDragging() {
-      cancelLongPress();
-      if (state.isDragging) commitBatch();
-      state.isDragging = false;
-      $$('.slot.dragging').forEach(c => c.classList.remove('dragging'));
-    }
     async function copyText(text) {
       try {
         await navigator.clipboard.writeText(text);
@@ -1377,8 +1350,6 @@
     $('#submitModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'submitModalOverlay') closeSubmitModal(); });
     $('#sendEmailBtn').addEventListener('click', sendSummaryEmail);
     window.addEventListener('resize', updateScrollHint);
-    document.addEventListener('pointerup', stopDragging);
-    document.addEventListener('pointercancel', stopDragging);
     (async function init() {
       const ok = await loadRemote();
       if (!ok) return;
