@@ -298,6 +298,7 @@
     .person-name { font-weight:900; }
     .person-meta { color:var(--muted); font-size:11px; margin-top:4px; }
     .person-summary { margin-top:12px; color:#4f5865; font-size:12px; line-height:1.8; white-space:pre-wrap; }
+    .person-comment { margin-top:10px; padding:10px 12px; background:#f7f6f3; border-radius:12px; color:#4f5865; font-size:12px; line-height:1.7; white-space:pre-wrap; }
     .copy-box { width:100%; min-height:360px; border:1px solid var(--line); border-radius:18px; padding:18px; background:#fbfaf8; line-height:1.8; color:#424a56; resize:vertical; }
     .copy-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
     .empty { text-align:center; padding:44px 20px; color:var(--muted); }
@@ -600,6 +601,10 @@
               <div class="legend-item"><span class="dot"></span> 未選択・行けない</div>
               <div class="legend-item">タップで選択・切り替え</div>
             </div>
+            <div class="field comment-field">
+              <label for="participantComment">コメント・備考（任意）</label>
+              <textarea class="textarea" id="participantComment" placeholder="例：14時以降なら延長も可能です。当日は少し遅れるかもしれません。" style="min-height:80px"></textarea>
+            </div>
             <div class="action-footer">
               <div class="save-note">「回答を送信」を押すとサーバーに保存され、共有URLを知る全員に公開されます。</div>
               <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -786,11 +791,11 @@
       state.project = data.project;
       return true;
     }
-    async function saveResponseRemote(name, availability, originalText) {
+    async function saveResponseRemote(name, availability, originalText, comment) {
       const res = await fetch(`/api/project/${PROJECT_ID}/respond`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, availability, originalText })
+        body: JSON.stringify({ name, availability, originalText, comment })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { showToast(data.error || '回答の送信に失敗しました'); return false; }
@@ -1081,10 +1086,13 @@
         });
         commitBatch();
         renderSchedule();
-        status.className = 'parse-status show ' + (applied ? 'ok' : 'warn');
-        status.textContent = applied
-          ? `${data.summary || 'AIが日程を仮反映しました。'} 内容をご確認ください。`
-          : 'AIが日程を特定できませんでした。日付と可否をもう少し具体的に書いてみてください。';
+        if (applied) {
+          status.className = 'parse-status';
+          status.textContent = '';
+        } else {
+          status.className = 'parse-status show warn';
+          status.textContent = 'AIが日程を特定できませんでした。日付と可否をもう少し具体的に書いてみてください。';
+        }
       } catch (e) {
         status.className = 'parse-status show warn';
         status.textContent = e.message || '解析中にエラーが発生しました。しばらくしてから再度お試しください。';
@@ -1098,19 +1106,21 @@
       if (!Object.keys(state.draft).length) { showToast('参加できる日程を選択してください'); return; }
       const availability = {...state.draft};
       const originalText = $('#naturalInput').value.trim();
-      const ok = await saveResponseRemote(name, availability, originalText);
+      const comment = $('#participantComment').value.trim();
+      const ok = await saveResponseRemote(name, availability, originalText, comment);
       if (!ok) return;
       updateAll();
       clearUndo();
       showToast(`${name}さんの回答を送信しました`);
-      openSubmitModal(name, availability);
+      openSubmitModal(name, availability, comment);
     }
-    function openSubmitModal(name, availability) {
+    function openSubmitModal(name, availability, comment) {
       const overlay = $('#submitModalOverlay');
       $('#submitModalName').textContent = `${name}さんの回答（${state.project.name}）`;
       const summary =
         `【${state.project.name}】\n${name}さんの回答\n\n` +
         summarizeAvailability(availability) +
+        (comment ? `\n\n【コメント】\n${comment}` : '') +
         `\n\n送信日時：${new Date().toLocaleString('ja-JP')}`;
       $('#submitSummaryText').value = summary;
       $('#notifyEmail').value = '';
@@ -1249,6 +1259,7 @@
             <button class="btn btn-ghost btn-small" data-edit-person="${escapeAttr(p.name)}">編集</button>
           </div>
           <div class="person-summary">${escapeHtml(summarizeAvailability(p.availability))}</div>
+          ${p.comment ? `<div class="person-comment">💬 ${escapeHtml(p.comment)}</div>` : ''}
         </div>`;
       }).join('');
       $$('[data-edit-person]').forEach(btn => btn.addEventListener('click', () => {
@@ -1258,6 +1269,7 @@
         clearUndo();
         $('#participantName').value = name;
         $('#naturalInput').value = p.originalText || '';
+        $('#participantComment').value = p.comment || '';
         switchView('schedule');
         renderSchedule();
         showToast(`${name}さんの回答を編集できます`);
@@ -1294,6 +1306,7 @@
       entries.forEach(p => {
         out += `\n【${p.name}】\n${summarizeAvailability(p.availability)}\n`;
         if (p.originalText) out += `本人の入力：${p.originalText}\n`;
+        if (p.comment) out += `コメント：${p.comment}\n`;
       });
       out += `\n【おすすめ候補】\n`;
       if (!candidates.length) out += '回答がまだありません。\n';
