@@ -417,7 +417,8 @@
       .analysis-grid { grid-template-columns: minmax(0,1fr); }
       .stats-card { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .hero-card, .card, #settingsCard, .sticky-card { min-width:0; }
-    }    @media (max-width: 760px) {
+    }
+    @media (max-width: 760px) {
       .topbar-inner { padding:12px 14px; gap:10px; }
       .brand { min-width:0; }
       .brand-sub, .account-text { display:none; }
@@ -836,7 +837,8 @@
     }
     function getTimes() {
       const start = timeToMinutes(state.project.startTime);
-      const end = timeToMinutes(state.project.endTime);const times = [];
+      const end = timeToMinutes(state.project.endTime);
+      const times = [];
       for (let t=start; t<end; t+=Number(state.project.slotMinutes)) times.push(minutesToTime(t));
       return times;
     }
@@ -1255,7 +1257,8 @@
       const overlay = $('#submitModalOverlay');
       $('#submitModalTitle').textContent = isEdit ? '回答を修正しました 🔄' : '回答を送信しました ✅';
       $('#submitModalName').textContent = `${name}さんの回答（${state.project.name}）`;
-      const passwordBox = $('#submitModalPasswordBox');      if (password) {
+      const passwordBox = $('#submitModalPasswordBox');
+      if (password) {
         $('#submitModalPasswordValue').textContent = password;
         passwordBox.style.display = 'block';
       } else {
