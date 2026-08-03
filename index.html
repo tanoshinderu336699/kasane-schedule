@@ -98,6 +98,18 @@
     }
     .past-project-delete:hover { background: #fff0f1; border-color: #f3c7cb; }
     .past-project-delete:disabled { opacity: .5; cursor: default; }
+    .exclude-date-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .exclude-date-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fff0f1; border: 1px solid #f3c7cb; color: #a6353f;
+      border-radius: 999px; padding: 6px 8px 6px 12px; font-size: 12px; font-weight: 700;
+    }
+    .exclude-date-chip button {
+      flex: none; width: 20px; height: 20px; border-radius: 50%; border: 0;
+      background: rgba(166,53,63,.14); color: #a6353f; font-size: 12px; line-height: 1;
+      display: grid; place-items: center; padding: 0;
+    }
+    .exclude-date-empty { font-size: 12px; color: var(--muted); margin-top: 8px; }
     @media (max-width: 560px) {
       h1 { font-size: 30px; }
       .field-row { grid-template-columns: 1fr; }
@@ -141,6 +153,16 @@
             <label for="endDate">終了日</label>
             <input class="input" type="date" id="endDate" />
           </div>
+        </div>
+        <div class="field">
+          <label for="excludeDateInput">飛ばしたい日（任意）</label>
+          <div class="share-box">
+            <input class="input" type="date" id="excludeDateInput" />
+            <button class="btn btn-secondary" type="button" id="addExcludeDate">追加</button>
+          </div>
+          <div class="helper" style="margin-top:8px">開始日〜終了日の範囲内で、対象から外したい日を個別にいくつでも追加できます。</div>
+          <div class="exclude-date-list" id="excludeDateList"></div>
+          <div class="exclude-date-empty" id="excludeDateEmpty">飛ばす日はまだ設定されていません。</div>
         </div>
         <div class="field-row">
           <div class="field">
@@ -259,6 +281,55 @@
 
     let created = null;
     let isLoggedIn = false; // ログイン状態はDOMの表示スタイルではなく、この変数で管理する（一覧の反映漏れ対策）
+    let excludedDates = []; // 作成前に指定する「飛ばしたい日（対象から外す日）」
+
+    // yyyy-mm-dd を「◯月◯日（◯）」の形式に整形する
+    function formatExcludeDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const date = new Date(y, (m || 1) - 1, d || 1);
+      const week = ['日', '月', '火', '水', '木', '金', '土'];
+      return `${date.getMonth() + 1}月${date.getDate()}日（${week[date.getDay()]}）`;
+    }
+
+    function renderExcludeDateChips() {
+      const list = $('#excludeDateList');
+      const empty = $('#excludeDateEmpty');
+      if (!excludedDates.length) {
+        list.innerHTML = '';
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+      list.innerHTML = excludedDates.map(d => `
+        <span class="exclude-date-chip" data-exclude-date="${d}">
+          ${formatExcludeDate(d)}
+          <button type="button" data-remove-exclude-date="${d}" title="削除" aria-label="削除">×</button>
+        </span>
+      `).join('');
+      $$('[data-remove-exclude-date]', list).forEach(btn => {
+        btn.addEventListener('click', () => {
+          excludedDates = excludedDates.filter(x => x !== btn.dataset.removeExcludeDate);
+          renderExcludeDateChips();
+        });
+      });
+    }
+
+    function addExcludeDateFromInput() {
+      const input = $('#excludeDateInput');
+      const value = input.value;
+      if (!value) { showToast('飛ばしたい日を選択してください'); return; }
+      const startDate = $('#startDate').value;
+      const endDate = $('#endDate').value;
+      if (!startDate || !endDate) { showToast('先に開始日と終了日を入力してください'); return; }
+      if (value < startDate || value > endDate) { showToast('開始日〜終了日の範囲内の日付を選択してください'); return; }
+      if (!excludedDates.includes(value)) {
+        excludedDates = [...excludedDates, value].sort();
+        renderExcludeDateChips();
+      }
+      input.value = '';
+    }
+    $('#addExcludeDate').addEventListener('click', addExcludeDateFromInput);
+    renderExcludeDateChips();
 
     $('#createBtn').addEventListener('click', async () => {
       const errorBox = $('#errorBox');
@@ -270,7 +341,9 @@
         startTime: $('#startTime').value,
         endTime: $('#endTime').value,
         slotMinutes: Number($('#slotMinutes').value),
-        meetingMinutes: Number($('#meetingMinutes').value)
+        meetingMinutes: Number($('#meetingMinutes').value),
+        // 開始日〜終了日の範囲外に外れた分は念のためここでも除いておく（サーバー側でも検証される）
+        excludedDates: excludedDates.filter(d => d >= $('#startDate').value && d <= $('#endDate').value)
       };
       if (!body.startDate || !body.endDate) {
         errorBox.textContent = '開始日と終了日を入力してください。';
