@@ -17,6 +17,24 @@ function todayStr(offsetDays = 0) {
   return d.toISOString().slice(0, 10);
 }
 
+// 開始日〜終了日の範囲内で「飛ばしたい日（対象から外す日）」を検証・整形する。
+// 形式が不正な値や範囲外の日付、重複は取り除き、日付の昇順に並べ替える。
+function sanitizeExcludedDates(list, startDate, endDate) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const raw of list) {
+    if (typeof raw !== 'string') continue;
+    const value = raw.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
+    if (value < startDate || value > endDate) continue;
+    if (seen.has(value)) continue;
+    seen.add(value);
+    out.push(value);
+  }
+  return out.sort();
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method Not Allowed' });
@@ -39,6 +57,7 @@ module.exports = async (req, res) => {
       endTime: body.endTime || DEFAULTS.endTime,
       slotMinutes: Number(body.slotMinutes) || DEFAULTS.slotMinutes,
       meetingMinutes: Number(body.meetingMinutes) || DEFAULTS.meetingMinutes,
+      excludedDates: [],
       createdAt: new Date().toISOString()
     };
 
@@ -46,6 +65,9 @@ module.exports = async (req, res) => {
       res.status(400).json({ error: '終了日は開始日以降にしてください' });
       return;
     }
+
+    // 開始日〜終了日の範囲内で、飛ばしたい日（対象から外す日）があれば反映する。
+    project.excludedDates = sanitizeExcludedDates(body.excludedDates, project.startDate, project.endDate);
 
     const id = genId(6);
     const editToken = genToken(18);
