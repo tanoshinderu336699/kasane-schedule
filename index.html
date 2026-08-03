@@ -258,6 +258,7 @@
     }
 
     let created = null;
+    let isLoggedIn = false; // ログイン状態はDOMの表示スタイルではなく、この変数で管理する（一覧の反映漏れ対策）
 
     $('#createBtn').addEventListener('click', async () => {
       const errorBox = $('#errorBox');
@@ -295,7 +296,11 @@
         $('#formArea').style.display = 'none';
         $('#resultArea').classList.add('show');
         showToast('プロジェクトを作成しました');
-        if ($('#pastProjectsCard').style.display !== 'none') loadPastProjects();
+        // 作成直後は「過去に作成したプロジェクト」一覧に必ず反映する。
+        // 以前はカードの表示スタイル（display）を見て判定していたが、ログイン直後の
+        // 読み込みタイミングによっては一覧が更新されないことがあったため、
+        // ログイン状態を表すisLoggedInフラグで確実に判定するように変更。
+        if (isLoggedIn) loadPastProjects();
       } catch (e) {
         errorBox.textContent = e.message || '作成に失敗しました。時間をおいて再度お試しください。';
         errorBox.classList.add('show');
@@ -320,12 +325,14 @@
     }
 
     function showLoggedOut() {
+      isLoggedIn = false;
       $('#loggedOutArea').style.display = '';
       $('#loggedInArea').style.display = 'none';
       $('#pastProjectsCard').style.display = 'none';
     }
 
     function showLoggedIn(user) {
+      isLoggedIn = true;
       $('#loggedOutArea').style.display = 'none';
       $('#loggedInArea').style.display = '';
       $('#userName').textContent = user.name || '';
