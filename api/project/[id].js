@@ -10,6 +10,24 @@ function timeToMinutes(t) {
   return (h || 0) * 60 + (m || 0);
 }
 
+// 開始日〜終了日の範囲内で「飛ばしたい日（対象から外す日）」を検証・整形する。
+// 形式が不正な値や範囲外の日付、重複は取り除き、日付の昇順に並べ替える。
+function sanitizeExcludedDates(list, startDate, endDate) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const raw of list) {
+    if (typeof raw !== 'string') continue;
+    const value = raw.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
+    if (value < startDate || value > endDate) continue;
+    if (seen.has(value)) continue;
+    seen.add(value);
+    out.push(value);
+  }
+  return out.sort();
+}
+
 module.exports = async (req, res) => {
   if (!isConfigured()) {
     res.status(503).json({
@@ -34,7 +52,11 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
       const token = req.query.token || '';
       const isHost = Boolean(token) && token === data.editToken;
-      res.status(200).json({ project: data.project, responses: data.responses || {}, isHost });
+      // excludedDates は後から追加した項目のため、以前作成されたプロジェクトには
+      // データが存在しない。存在しない場合は空配列を補って返すことで、
+      // 過去のプロジェクトを開いてもエラーにならないようにする。
+      const project = { excludedDates: [], ...data.project };
+      res.status(200).json({ project, responses: data.responses || {}, isHost });
       return;
     }
 
@@ -54,6 +76,7 @@ module.exports = async (req, res) => {
         endTime: p.endTime,
         slotMinutes: Number(p.slotMinutes) || 30,
         meetingMinutes: Number(p.meetingMinutes) || 60,
+        excludedDates: [],
         createdAt: data.project.createdAt
       };
       if (!next.startDate || !next.endDate || toDate(next.startDate) > toDate(next.endDate)) {
@@ -69,6 +92,8 @@ module.exports = async (req, res) => {
         res.status(400).json({ error: '調整期間は最大31日までです' });
         return;
       }
+      // 開始日〜終了日の範囲内で、飛ばしたい日（対象から外す日）があれば反映する。
+      next.excludedDates = sanitizeExcludedDates(p.excludedDates, next.startDate, next.endDate);
       data.project = next;
       await setProject(id, data);
       res.status(200).json({ project: data.project, isHost: true });
