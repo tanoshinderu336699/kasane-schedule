@@ -213,6 +213,18 @@
     .share-box .input { font-size:16px; min-height:44px; }
     .share-box { flex-wrap:wrap; }
     .share-box .input { flex:1 1 160px; min-width:0; }
+    .exclude-date-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .exclude-date-chip {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--yes-soft); border:1px solid #f6cdd0; color:var(--yes);
+      border-radius:999px; padding:6px 8px 6px 12px; font-size:12px; font-weight:800;
+    }
+    .exclude-date-chip button {
+      flex:none; width:20px; height:20px; border-radius:50%; border:0;
+      background:rgba(231,96,104,.16); color:var(--yes); font-size:12px; line-height:1;
+      display:grid; place-items:center; padding:0;
+    }
+    .exclude-date-empty { font-size:11px; color:var(--muted); margin-top:8px; }
     .participant-header {
       display:flex; flex-wrap:wrap; align-items:end; gap:12px;
       margin-bottom:18px;
@@ -534,6 +546,16 @@
                 </select>
               </div>
             </div>
+            <div class="field">
+              <label for="excludeDateInput">飛ばしたい日（任意）</label>
+              <div class="share-box">
+                <input class="input" type="date" id="excludeDateInput" />
+                <button class="btn btn-secondary btn-small" id="addExcludeDate" type="button">追加</button>
+              </div>
+              <div class="helper" style="margin-top:8px">開始日〜終了日の範囲内で、対象から外したい日を個別にいくつでも追加できます。</div>
+              <div class="exclude-date-list" id="excludeDateList"></div>
+              <div class="exclude-date-empty" id="excludeDateEmpty">飛ばす日はまだ設定されていません。</div>
+            </div>
             <button class="btn btn-primary host-only" id="applySettings" style="width:100%;display:none">設定を反映</button>
             <div class="section-label">共有URL（参加者用）</div>
             <div class="share-box">
@@ -701,8 +723,10 @@
         startTime: '09:00',
         endTime: '22:00',
         slotMinutes: 30,
-        meetingMinutes: 60
+        meetingMinutes: 60,
+        excludedDates: []
       },
+      draftExcludedDates: [],
       draft: {},
       responses: {},
       pendingBatch: null,
@@ -729,11 +753,14 @@
     function getDates() {
       const start = toDate(state.project.startDate);
       const end = toDate(state.project.endDate);
+      const excluded = new Set(state.project.excludedDates || []);
       const dates = [];
       const cursor = new Date(start);
-      while (cursor <= end && dates.length < 31) {
-        dates.push(new Date(cursor));
+      let guard = 0;
+      while (cursor <= end && guard < 31) {
+        if (!excluded.has(ymd(cursor))) dates.push(new Date(cursor));
         cursor.setDate(cursor.getDate()+1);
+        guard++;
       }
       return dates;
     }
@@ -767,7 +794,9 @@
     async function loadRemote() {
       try {
         const data = await apiGetProject();
-        state.project = data.project;
+        // excludedDates は後から追加した項目のため、以前作成されたプロジェクトのデータには
+        // 含まれていないことがある。存在しない場合は空配列を補って、常に配列として扱えるようにする。
+        state.project = { excludedDates: [], ...data.project };
         state.responses = data.responses || {};
         isHost = !!data.isHost;
         return true;
@@ -847,7 +876,7 @@
       if (settingsCard) settingsCard.style.display = isHost ? '' : 'none';
       const layoutEl = $('.layout');
       if (layoutEl) layoutEl.classList.toggle('guest-mode', !isHost);
-      ['projectName','startDate','endDate','startTime','endTime','slotMinutes','meetingMinutes'].forEach(id => {
+      ['projectName','startDate','endDate','startTime','endTime','slotMinutes','meetingMinutes','excludeDateInput','addExcludeDate'].forEach(id => {
         const el = $('#'+id);
         if (el) el.disabled = !isHost;
       });
@@ -879,6 +908,34 @@
       $('#slotMinutes').value = String(state.project.slotMinutes);
       $('#meetingMinutes').value = String(state.project.meetingMinutes);
       $('#scheduleTitle').textContent = state.project.name;
+      state.draftExcludedDates = [...(state.project.excludedDates || [])];
+      renderExcludeDateChips();
+    }
+    function renderExcludeDateChips() {
+      const list = $('#excludeDateList');
+      const empty = $('#excludeDateEmpty');
+      if (!list || !empty) return;
+      const dates = state.draftExcludedDates || [];
+      if (!dates.length) {
+        list.innerHTML = '';
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+      list.innerHTML = dates.map(d => `
+        <span class="exclude-date-chip" data-exclude-date="${d}">
+          ${formatDate(d)}
+          <button type="button" class="host-only" data-remove-exclude-date="${d}" title="削除" aria-label="削除">×</button>
+        </span>
+      `).join('');
+      $$('[data-remove-exclude-date]', list).forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!isHost) return;
+          state.draftExcludedDates = state.draftExcludedDates.filter(x => x !== btn.dataset.removeExcludeDate);
+          renderExcludeDateChips();
+        });
+        btn.disabled = !isHost;
+      });
     }
     function renderSchedule() {
       const dates = getDates();
@@ -1225,7 +1282,7 @@
       const list = $('#candidateList');
       const candidates = calculateCandidates().slice(0,8);
       if (!Object.keys(state.responses).length) {
-        list.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>回答が集まると、ここに最適候補が表示されます。</div>';
+        list.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>回答が集���ると、ここに最適候補が表示されます。</div>';
         $('#bestCandidateMini').textContent = '未集計';
         return;
       }
@@ -1369,17 +1426,38 @@
       if (timeToMinutes(next.startTime) >= timeToMinutes(next.endTime)) { showToast('終了時間は開始時間より後にしてください'); return; }
       const span = (toDate(next.endDate)-toDate(next.startDate))/(1000*60*60*24);
       if (span > 30) { showToast('調整期間は最大31日までです'); return; }
+      // 開始日・終了日をこのタイミングで変更していた場合に備え、範囲外になった
+      // 「飛ばす日」は保存前に取り除いておく（サーバー側でも同様に検証される）。
+      next.excludedDates = (state.draftExcludedDates || []).filter(d => d >= next.startDate && d <= next.endDate);
       const ok = await saveSettingsRemote(next);
       if (!ok) return;
       state.draft = {};
       clearUndo();
+      // 保存後のstate.projectはサーバー側で検証済みの値なので、飛ばす日の表示もそこから同期し直す。
+      state.draftExcludedDates = [...(state.project.excludedDates || [])];
+      renderExcludeDateChips();
       $('#scheduleTitle').textContent = state.project.name;
       renderSchedule(); updateAll(); showToast('プロジェクト設定を反映しました');
+    }
+    function addExcludeDateFromInput() {
+      if (!isHost) { showToast('設定の変更には管理用URLが必要です'); return; }
+      const input = $('#excludeDateInput');
+      const value = input.value;
+      if (!value) { showToast('飛ばしたい日を選択してください'); return; }
+      const startDate = $('#startDate').value || state.project.startDate;
+      const endDate = $('#endDate').value || state.project.endDate;
+      if (value < startDate || value > endDate) { showToast('開始日〜終了日の範囲内の日付を選択してください'); return; }
+      if (!state.draftExcludedDates.includes(value)) {
+        state.draftExcludedDates = [...state.draftExcludedDates, value].sort();
+        renderExcludeDateChips();
+      }
+      input.value = '';
     }
     $$('.nav-tab').forEach(tab => tab.addEventListener('click', () => switchView(tab.dataset.view)));
     $('#parseNatural').addEventListener('click', parseNaturalLanguage);
     $('#saveResponse').addEventListener('click', saveResponse);
     $('#applySettings').addEventListener('click', applyProjectSettings);
+    $('#addExcludeDate').addEventListener('click', addExcludeDateFromInput);
     $('#copyUrl').addEventListener('click', async () => { await copyText($('#shareUrl').value); showToast('共有URLをコピーしました'); });
     if ($('#copyHostUrl')) $('#copyHostUrl').addEventListener('click', async () => { await copyText($('#hostUrl').value); showToast('管理用URLをコピーしました'); });
     $('#copyExport').addEventListener('click', async () => { await copyText($('#exportText').value); showToast('文章をコピーしました'); });
