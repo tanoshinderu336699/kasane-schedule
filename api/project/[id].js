@@ -28,6 +28,17 @@ function sanitizeExcludedDates(list, startDate, endDate) {
   return out.sort();
 }
 
+// 回答一覧に含まれる修正用パスワードを取り除いたコピーを返す。
+// 共有URLを知っている人なら誰でも見られる情報のため、パスワードは絶対に含めない。
+function sanitizeResponses(responses) {
+  const out = {};
+  for (const [name, entry] of Object.entries(responses || {})) {
+    const { password, ...rest } = entry || {};
+    out[name] = rest;
+  }
+  return out;
+}
+
 module.exports = async (req, res) => {
   if (!isConfigured()) {
     res.status(503).json({
@@ -56,7 +67,31 @@ module.exports = async (req, res) => {
       // データが存在しない。存在しない場合は空配列を補って返すことで、
       // 過去のプロジェクトを開いてもエラーにならないようにする。
       const project = { excludedDates: [], ...data.project };
-      res.status(200).json({ project, responses: data.responses || {}, isHost });
+      res.status(200).json({ project, responses: sanitizeResponses(data.responses), isHost });
+      return;
+    }
+
+    if (req.method === 'POST') {
+      const body = req.body || {};
+      // 参加者が「修正画面」に進むための、名前＋パスワードの照合専用アクション。
+      if (body.action === 'verify') {
+        const name = String(body.name || '').trim().slice(0, 40);
+        const password = String(body.password || '').slice(0, 40);
+        const entry = (data.responses || {})[name];
+        if (!entry) {
+          res.status(404).json({ error: 'その名前の回答が見つかりませんでした' });
+          return;
+        }
+        const existingPassword = String(entry.password || '');
+        if (existingPassword !== password) {
+          res.status(403).json({ error: 'パスワードが正しくありません' });
+          return;
+        }
+        // 照合に成功した本人にだけ、自分の回答内容（パスワードを含む）を返す。
+        res.status(200).json({ entry });
+        return;
+      }
+      res.status(400).json({ error: '不正なリクエストです' });
       return;
     }
 
