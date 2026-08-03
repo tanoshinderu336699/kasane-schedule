@@ -62,20 +62,28 @@ module.exports = async (req, res) => {
     }
     const now = new Date().toISOString();
     const createdAt = existing && existing.createdAt ? existing.createdAt : now;
+    // 主催者が代わりに修正する場合、修正フォームにはパスワードが入力されないため、
+    // 空欄のまま保存すると本人が設定したパスワードが消えてしまう。
+    // ホストからの編集で、かつパスワード欄が空、かつ既存の回答がある場合は、
+    // 既存のパスワードをそのまま引き継ぐ。
+    let finalPassword = submittedPassword;
+    if (isHostRequest && !submittedPassword && existing) {
+      finalPassword = String(existing.password || '');
+    }
     data.responses[name] = {
       name,
       availability,
       originalText: String(body.originalText || '').slice(0, 2000),
       comment: String(body.comment || '').slice(0, 500),
-      password: submittedPassword,
+      password: finalPassword,
       createdAt,
       updatedAt: now
     };
     await setProject(id, data);
     res.status(200).json({
       responses: sanitizeResponses(data.responses),
-      // 送信した本人にだけ、確認画面に表示するためのパスワードを返す
-      password: submittedPassword
+      // 送信した本人（または代理で修正した主催者）にだけ、確認画面に表示するためのパスワードを返す
+      password: finalPassword
     });
   } catch (e) {
     res.status(500).json({ error: e.message || 'サーバーエラーが発生しました' });
