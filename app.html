@@ -348,6 +348,18 @@
     .danger-zone { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
     .danger-zone .section-label { color:#b33a44; }
     .danger-zone .helper { margin-bottom:10px; }
+    .split-toggle { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .split-toggle-btn {
+      border:2px solid var(--line); border-radius:12px; min-height:38px; padding:0 16px;
+      font-weight:800; font-size:13px; background:#fff; color:var(--muted);
+      touch-action:manipulation; transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+    }
+    .split-toggle-btn:active { transform: translateY(1px); }
+    .split-toggle-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 6px 16px rgba(22,30,44,.22); }
+    .team-plan-card { border:1px solid var(--line); border-radius:var(--radius-lg); padding:18px; margin-bottom:16px; background:#fff; }
+    .team-plan-title { font-weight:800; font-size:12px; color:var(--gold); letter-spacing:.06em; margin-bottom:12px; }
+    .team-plan-warn { font-size:11.5px; color:var(--warning); line-height:1.7; margin-top:8px; }
+    .team-plan-bad { font-size:11.5px; color:#b33a44; line-height:1.7; margin-top:8px; }
     .modal-overlay {
       display:none; position:fixed; inset:0; z-index:90;
       background:rgba(20,24,32,.52); backdrop-filter:blur(3px);
@@ -499,7 +511,6 @@
           <h1>みんなの予定が、<br>一番美しく重なる場所へ。</h1>
           <p class="hero-lead">○・△を直感的に選ぶだけ。文章や音声で話しても、そのまま候補日へ反映。複雑な日程調整を、誰でも迷わず使える体験に変えます。</p>
           <div class="hero-actions host-only" id="hostActions" style="display:none">
-            <button class="btn btn-primary" id="loadDemo">デモ回答を読み込む</button>
             <button class="btn btn-secondary" id="resetAll">データを初期化</button>
           </div>
           <div class="hero-actions" id="guestActions" style="display:none">
@@ -529,65 +540,11 @@
           <aside class="card sticky-card" id="settingsCard">
             <div class="card-head">
               <div>
-                <h2 class="card-title">プロジェクト設定</h2>
-                <div class="card-sub">主催者が設定する調整条件です。変更すると回答画面も自動で更新されます。</div>
+                <h2 class="card-title">プロジェクト管理</h2>
+                <div class="card-sub">共有URL・管理用URLの確認や、プロジェクトの削除はこちらから行えます。</div>
               </div>
             </div>
-            <div class="field">
-              <label for="projectName">プロジェクト名</label>
-              <input class="input" id="projectName" value="8月チームミーティング" />
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="startDate">開始日</label>
-                <input class="input" type="date" id="startDate" value="2026-08-03" />
-              </div>
-              <div class="field">
-                <label for="endDate">終了日</label>
-                <input class="input" type="date" id="endDate" value="2026-08-07" />
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="startTime">開始時間</label>
-                <input class="input" type="time" id="startTime" value="09:00" />
-              </div>
-              <div class="field">
-                <label for="endTime">終了時間</label>
-                <input class="input" type="time" id="endTime" value="22:00" />
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="slotMinutes">回答単位</label>
-                <select class="select" id="slotMinutes">
-                  <option value="15">15分</option>
-                  <option value="30" selected>30分</option>
-                  <option value="60">60分</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="meetingMinutes">必要時間</label>
-                <select class="select" id="meetingMinutes">
-                  <option value="30">30分</option>
-                  <option value="60" selected>60分</option>
-                  <option value="90">90分</option>
-                  <option value="120">120分</option>
-                </select>
-              </div>
-            </div>
-            <div class="field">
-              <label for="excludeDateInput">飛ばしたい日（任意）</label>
-              <div class="share-box">
-                <input class="input" type="date" id="excludeDateInput" />
-                <button class="btn btn-secondary btn-small" id="addExcludeDate" type="button">追加</button>
-              </div>
-              <div class="helper" style="margin-top:8px">開始日〜終了日の範囲内で、対象から外したい日を個別にいくつでも追加できます。</div>
-              <div class="exclude-date-list" id="excludeDateList"></div>
-              <div class="exclude-date-empty" id="excludeDateEmpty">飛ばす日はまだ設定されていません。</div>
-            </div>
-            <button class="btn btn-primary host-only" id="applySettings" style="width:100%;display:none">設定を反映</button>
-            <div class="section-label">共有URL（参加者用）</div>
+            <div class="section-label" style="margin-top:0">共有URL（参加者用）</div>
             <div class="share-box">
               <input class="input" id="shareUrl" value="" readonly />
               <button class="btn btn-secondary btn-small" id="copyUrl">コピー</button>
@@ -703,6 +660,11 @@
               </div>
               <button class="btn btn-secondary btn-small" id="refreshAnalysis">再集計</button>
             </div>
+            <div class="split-toggle" id="candidateModeToggle">
+              <button type="button" class="split-toggle-btn active" data-candidate-mode="all">👥 全員でミーティング</button>
+              <button type="button" class="split-toggle-btn" data-candidate-mode="team2">✂️ 2チームに分ける</button>
+              <button type="button" class="split-toggle-btn" data-candidate-mode="team3">✂️ 3チームに分ける</button>
+            </div>
             <div class="candidate-list" id="candidateList"></div>
           </div>
           <div class="card">
@@ -730,8 +692,13 @@
           <div class="card-head">
             <div>
               <h2 class="card-title">AI・共有用の文章出力</h2>
-              <div class="card-sub">参加者ごとの状況と候補日を、コピーしやすい文章へ自動変換します。</div>
+              <div class="card-sub">コピーしてAIチャットに貼り付けるだけで、日程調整の提案をそのまま作ってもらえる文章です。</div>
             </div>
+          </div>
+          <div class="split-toggle" id="exportModeToggle">
+            <button type="button" class="split-toggle-btn active" data-export-mode="all">👥 全員向け</button>
+            <button type="button" class="split-toggle-btn" data-export-mode="team2">✂️ 2チームに分割</button>
+            <button type="button" class="split-toggle-btn" data-export-mode="team3">✂️ 3チームに分割</button>
           </div>
           <textarea class="copy-box" id="exportText" readonly></textarea>
           <div class="copy-actions">
@@ -777,6 +744,8 @@
     if (!PROJECT_ID) { location.href = './index.html'; }
     const state = {
       mode: 'yes',
+      candidateMode: 'all',
+      exportMode: 'all',
       project: {
         name: '',
         startDate: '',
@@ -787,7 +756,6 @@
         meetingMinutes: 60,
         excludedDates: []
       },
-      draftExcludedDates: [],
       draft: {},
       responses: {},
       pendingBatch: null,
@@ -931,16 +899,11 @@
       if (!res.ok) { showToast(data.error || '削除に失敗しました'); return false; }
       return true;
     }
-    async function demoRemote() {
-      const res = await fetch(`/api/project/${PROJECT_ID}/demo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: HOST_TOKEN })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) { showToast(data.error || 'デモデータの読み込みに失敗しました'); return false; }
-      state.responses = data.responses;
-      return true;
+    function updateHeroVisibility(view) {
+      // heroSection（回答済み・最有力候補・共有URLなどのミニ統計とデータ初期化ボタン）は
+      // 「日程回答」タブでのみ表示し、重なり分析・文章出力タブでは重複表示しないようにする。
+      const heroSection = $('#heroSection');
+      if (heroSection) heroSection.style.display = (isHost && view === 'schedule') ? '' : 'none';
     }
     function applyHostVisibility() {
       $$('.host-only').forEach(el => { el.style.display = isHost ? '' : 'none'; });
@@ -949,16 +912,11 @@
       // 参加者（共有URLからの訪問者）には「新しいプロジェクトを作る」「プロジェクト設定」
       // 「回答済み人数」などの主催者向け情報を隠し、ミーティング名→お名前→日程入力
       // だけのシンプルな画面から始める。
-      const heroSection = $('#heroSection');
-      if (heroSection) heroSection.style.display = isHost ? '' : 'none';
+      updateHeroVisibility('schedule');
       const settingsCard = $('#settingsCard');
       if (settingsCard) settingsCard.style.display = isHost ? '' : 'none';
       const layoutEl = $('.layout');
       if (layoutEl) layoutEl.classList.toggle('guest-mode', !isHost);
-      ['projectName','startDate','endDate','startTime','endTime','slotMinutes','meetingMinutes','excludeDateInput','addExcludeDate'].forEach(id => {
-        const el = $('#'+id);
-        if (el) el.disabled = !isHost;
-      });
       const badge = $('#accountBadge');
       const avatar = $('#accountAvatar');
       const text = $('#accountText');
@@ -979,42 +937,7 @@
       if (hostInput) hostInput.value = location.origin + location.pathname + '?id=' + PROJECT_ID + '&token=' + HOST_TOKEN;
     }
     function syncInputsFromState() {
-      $('#projectName').value = state.project.name;
-      $('#startDate').value = state.project.startDate;
-      $('#endDate').value = state.project.endDate;
-      $('#startTime').value = state.project.startTime;
-      $('#endTime').value = state.project.endTime;
-      $('#slotMinutes').value = String(state.project.slotMinutes);
-      $('#meetingMinutes').value = String(state.project.meetingMinutes);
       $('#scheduleTitle').textContent = state.project.name;
-      state.draftExcludedDates = [...(state.project.excludedDates || [])];
-      renderExcludeDateChips();
-    }
-    function renderExcludeDateChips() {
-      const list = $('#excludeDateList');
-      const empty = $('#excludeDateEmpty');
-      if (!list || !empty) return;
-      const dates = state.draftExcludedDates || [];
-      if (!dates.length) {
-        list.innerHTML = '';
-        empty.style.display = '';
-        return;
-      }
-      empty.style.display = 'none';
-      list.innerHTML = dates.map(d => `
-        <span class="exclude-date-chip" data-exclude-date="${d}">
-          ${formatDate(d)}
-          <button type="button" class="host-only" data-remove-exclude-date="${d}" title="削除" aria-label="削除">×</button>
-        </span>
-      `).join('');
-      $$('[data-remove-exclude-date]', list).forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (!isHost) return;
-          state.draftExcludedDates = state.draftExcludedDates.filter(x => x !== btn.dataset.removeExcludeDate);
-          renderExcludeDateChips();
-        });
-        btn.disabled = !isHost;
-      });
     }
     function renderSchedule() {
       const dates = getDates();
@@ -1428,15 +1351,109 @@
       });
       return result.sort((a,b) => b.yes-a.yes || (b.yes+b.maybe)-(a.yes+a.maybe) || a.no-b.no || a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
     }
+    // 参加者を2チーム／3チームに分けて、それぞれのチームがまとまって参加できる
+    // 候補日時を貪欲法（グリーディ法）で探す。まず一番人気の高い候補を1つ選び、
+    // 残りのチーム分は「まだどのチームにも割り当たっていない人」を最大限カバーできる
+    // 候補を順番に追加していく。これを複数の起点候補（上位10件）から試すことで、
+    // 複数パターンの分割案（第1〜3候補）を作る。
+    function buildTeamPlanFromAnchor(anchor, teamCount, allCandidates, names) {
+      const chosen = [anchor];
+      const chosenKeys = new Set([anchor.date + '|' + anchor.start]);
+      const covered = new Set([...anchor.yesNames, ...anchor.maybeNames]);
+      while (chosen.length < teamCount) {
+        let best = null, bestScore = -1;
+        allCandidates.forEach(cand => {
+          const k = cand.date + '|' + cand.start;
+          if (chosenKeys.has(k)) return;
+          let gain = 0;
+          names.forEach(n => {
+            if (covered.has(n)) return;
+            if (cand.yesNames.includes(n)) gain += 1;
+            else if (cand.maybeNames.includes(n)) gain += 0.5;
+          });
+          const score = gain * 1000 + cand.yes;
+          if (score > bestScore) { bestScore = score; best = cand; }
+        });
+        if (!best) break;
+        chosen.push(best);
+        chosenKeys.add(best.date + '|' + best.start);
+        best.yesNames.forEach(n => covered.add(n));
+        best.maybeNames.forEach(n => covered.add(n));
+      }
+      if (chosen.length < teamCount) return null;
+      const teams = chosen.map(slot => ({ slot, members: [], maybeMembers: [] }));
+      const duplicated = [];
+      const uncovered = [];
+      names.forEach(name => {
+        const yesTeams = [];
+        const maybeTeams = [];
+        teams.forEach((t, idx) => {
+          if (t.slot.yesNames.includes(name)) yesTeams.push(idx);
+          else if (t.slot.maybeNames.includes(name)) maybeTeams.push(idx);
+        });
+        if (yesTeams.length) {
+          yesTeams.sort((i1, i2) => teams[i1].members.length - teams[i2].members.length);
+          teams[yesTeams[0]].members.push(name);
+        } else if (maybeTeams.length) {
+          maybeTeams.sort((i1, i2) => teams[i1].members.length - teams[i2].members.length);
+          teams[maybeTeams[0]].maybeMembers.push(name);
+        } else {
+          uncovered.push(name);
+        }
+      });
+      // どのチームの候補時間にも参加できない人がいる場合、完全に除外するのではなく、
+      // 本人の回答の中で一番相性が良い候補日を探し、一番近いチームに「重複参加の候補」
+      // として仮に加える（ユーザーの要望：1人だけの重複はOK、除外は避けたい）。
+      uncovered.slice().forEach(name => {
+        const personalBest = allCandidates.find(c => c.yesNames.includes(name) || c.maybeNames.includes(name));
+        if (personalBest) {
+          let idx = teams.findIndex(t => t.slot.date === personalBest.date);
+          if (idx === -1) {
+            idx = teams.reduce((minIdx, t, i, arr) => (
+              (t.members.length + t.maybeMembers.length) < (arr[minIdx].members.length + arr[minIdx].maybeMembers.length) ? i : minIdx
+            ), 0);
+          }
+          teams[idx].maybeMembers.push(name);
+          duplicated.push({ name });
+          uncovered.splice(uncovered.indexOf(name), 1);
+        }
+      });
+      const score = teams.reduce((s, t) => s + t.members.length * 2 + t.maybeMembers.length, 0) - duplicated.length * 3 - uncovered.length * 5;
+      return { teamCount, teams, duplicated, uncovered, score };
+    }
+    function calculateTeamSplitPlans(teamCount, maxPlans) {
+      maxPlans = maxPlans || 3;
+      const names = Object.keys(state.responses);
+      if (!names.length) return [];
+      const allCandidates = calculateCandidates();
+      if (!allCandidates.length) return [];
+      const plans = [];
+      const seenPlanKeys = new Set();
+      const anchorPool = allCandidates.slice(0, Math.min(allCandidates.length, 10));
+      for (let a = 0; a < anchorPool.length && plans.length < maxPlans; a++) {
+        const plan = buildTeamPlanFromAnchor(anchorPool[a], teamCount, allCandidates, names);
+        if (!plan) continue;
+        const planKey = plan.teams.map(t => t.slot.date + '|' + t.slot.start).sort().join(',');
+        if (seenPlanKeys.has(planKey)) continue;
+        seenPlanKeys.add(planKey);
+        plans.push(plan);
+      }
+      return plans.sort((p1, p2) => p2.score - p1.score);
+    }
+    function updateBestCandidateMini() {
+      const mini = $('#bestCandidateMini');
+      if (!mini) return;
+      if (!Object.keys(state.responses).length) { mini.textContent = '未集計'; return; }
+      const candidates = calculateCandidates();
+      mini.textContent = candidates[0] ? `${formatDate(candidates[0].date)} ${candidates[0].start}` : '候補なし';
+    }
     function renderCandidates() {
       const list = $('#candidateList');
       const candidates = calculateCandidates().slice(0,8);
       if (!Object.keys(state.responses).length) {
         list.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>回答が集まると、ここに最適候補が表示されます。</div>';
-        $('#bestCandidateMini').textContent = '未集計';
         return;
       }
-      $('#bestCandidateMini').textContent = candidates[0] ? `${formatDate(candidates[0].date)} ${candidates[0].start}` : '候補なし';
       list.innerHTML = candidates.map((c,i) => `
         <div class="candidate">
           <div class="rank">${i+1}</div>
@@ -1449,6 +1466,51 @@
             <div class="score-row"><span class="pill yes">○ ${c.yes}</span><span class="pill maybe">△ ${c.maybe}</span></div>
           </div>
         </div>`).join('');
+    }
+    function renderTeamPlans(teamCount) {
+      const list = $('#candidateList');
+      if (!Object.keys(state.responses).length) {
+        list.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>回答が集まると、ここに最適候補が表示されます。</div>';
+        return;
+      }
+      const plans = calculateTeamSplitPlans(teamCount, 3);
+      if (!plans.length) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">△</div>${teamCount}チームに分けられる候補がまだ見つかりません。候補日時を増やすか、全員でのミーティングをご検討ください。</div>`;
+        return;
+      }
+      list.innerHTML = plans.map((plan, pi) => {
+        const teamsHtml = plan.teams.map((t, ti) => {
+          const yesNames = t.members.join('・') || 'なし';
+          const maybeNames = t.maybeMembers.join('・');
+          return `<div class="candidate" style="margin-bottom:8px">
+            <div class="rank">${ti+1}</div>
+            <div>
+              <div class="candidate-title">チーム${ti+1}：${formatDate(t.slot.date)} ${t.slot.start}〜${t.slot.end}</div>
+              <div class="candidate-meta">○ ${yesNames}${maybeNames ? ` ／ △ ${maybeNames}` : ''}</div>
+            </div>
+            <div class="candidate-score">
+              <strong>${t.members.length + t.maybeMembers.length}<small style="font-size:11px;color:var(--muted)">人</small></strong>
+            </div>
+          </div>`;
+        }).join('');
+        const dupHtml = plan.duplicated.length
+          ? `<div class="team-plan-warn">⚠️ ${plan.duplicated.map(d => escapeHtml(d.name)).join('、')} さんは都合の合う候補が見つからなかったため、参考として近いチームに仮で加えています（重複参加の可能性）。</div>`
+          : '';
+        const uncoveredHtml = plan.uncovered.length
+          ? `<div class="team-plan-bad">🚫 ${plan.uncovered.map(escapeHtml).join('、')} さんはどのチームの候補時間にも参加できませんでした。別日程のご案内をおすすめします。</div>`
+          : '';
+        return `<div class="team-plan-card">
+          <div class="team-plan-title">第${pi+1}案</div>
+          ${teamsHtml}
+          ${dupHtml}
+          ${uncoveredHtml}
+        </div>`;
+      }).join('');
+    }
+    function renderCandidateSection() {
+      if (state.candidateMode === 'team2') renderTeamPlans(2);
+      else if (state.candidateMode === 'team3') renderTeamPlans(3);
+      else renderCandidates();
     }
     function renderParticipants() {
       const wrap = $('#participantCards');
@@ -1516,45 +1578,86 @@
       html += '</tbody>';
       table.innerHTML = html;
     }
-    function generateExportText() {
-      const candidates = calculateCandidates().slice(0,5);
+    function buildParticipantBlock() {
       const entries = Object.values(state.responses);
-      let out = `【プロジェクト】\n${state.project.name}\n\n【調整期間】\n${formatDate(state.project.startDate)}〜${formatDate(state.project.endDate)}\n\n【回答状況】\n回答済み ${entries.length}人\n`;
+      let out = '';
       entries.forEach(p => {
         out += `\n【${p.name}】\n${summarizeAvailability(p.availability)}\n`;
         if (p.originalText) out += `本人の入力：${p.originalText}\n`;
         if (p.comment) out += `コメント：${p.comment}\n`;
       });
-      out += `\n【おすすめ候補】\n`;
+      return out;
+    }
+    function generateAllExportText() {
+      const candidates = calculateCandidates().slice(0,5);
+      const entries = Object.values(state.responses);
+      let out = `あなたは日程調整の専門アシスタントです。以下は「${state.project.name}」というミーティングの日程調整で集まった、全員分の回答データです。\n`;
+      out += `この情報をもとに、全員が参加しやすい候補日時を優先順位付きで3つ提案し、それぞれの理由（○人数・△人数・参加が難しくなりそうな人）も簡潔に添えてください。\n`;
+      out += `候補が拮抗している場合は、どちらを選ぶべきか判断のポイントも教えてください。\n`;
+      out += `\n【プロジェクト】\n${state.project.name}\n\n【調整期間】\n${formatDate(state.project.startDate)}〜${formatDate(state.project.endDate)}\n\n【回答状況】\n回答済み ${entries.length}人\n`;
+      out += buildParticipantBlock();
+      out += `\n【システム集計によるおすすめ候補（参考情報）】\n`;
       if (!candidates.length) out += '回答がまだありません。\n';
       else candidates.forEach((c,i) => {
         out += `第${i+1}候補：${formatDate(c.date)} ${c.start}〜${c.end}\n`;
         out += `○ ${c.yes}人（${c.yesNames.join('、') || 'なし'}）／△ ${c.maybe}人（${c.maybeNames.join('、') || 'なし'}）／参加困難 ${c.no}人\n`;
       });
+      out += `\n上記を踏まえて、最もおすすめの候補日時と、その理由を教えてください。\n`;
       return out;
+    }
+    function generateTeamExportText(teamCount) {
+      const entries = Object.values(state.responses);
+      const plans = calculateTeamSplitPlans(teamCount, 3);
+      let out = `あなたは日程調整の専門アシスタントです。以下は「${state.project.name}」というミーティングを、参加者${entries.length}人を${teamCount}チームに分けて${teamCount}回に分けて開催するための回答データです。\n`;
+      out += `全員が最低1回は参加できるように、${teamCount}つのグループそれぞれに適した日時を提案してください。できるだけ1人1回の参加で収まるように調整し、どうしても調整がつかない場合のみ、1人だけ2つのグループに重複して参加する案にしてください。\n`;
+      out += `それぞれの案について、グループ分け・日時・参加できない人がいればその理由を、簡潔にまとめて教えてください。\n`;
+      out += `\n【プロジェクト】\n${state.project.name}\n\n【調整期間】\n${formatDate(state.project.startDate)}〜${formatDate(state.project.endDate)}\n\n【回答状況】\n回答済み ${entries.length}人\n`;
+      out += buildParticipantBlock();
+      out += `\n【システム集計による${teamCount}チーム分割案（参考情報）】\n`;
+      if (!plans.length) {
+        out += '現時点では十分な候補日時が集まっていないため、システムからの提案はありません。\n';
+      } else {
+        plans.forEach((plan, pi) => {
+          out += `\n■第${pi+1}案\n`;
+          plan.teams.forEach((t, ti) => {
+            const yesNames = t.members.join('、') || 'なし';
+            const maybeNames = t.maybeMembers.join('、');
+            out += `チーム${ti+1}：${formatDate(t.slot.date)} ${t.slot.start}〜${t.slot.end}\n`;
+            out += `　○ ${yesNames}${maybeNames ? `／△ ${maybeNames}` : ''}\n`;
+          });
+          if (plan.duplicated.length) out += `　※重複参加の候補：${plan.duplicated.map(d=>d.name).join('、')}\n`;
+          if (plan.uncovered.length) out += `　※どの候補にも参加できない人：${plan.uncovered.join('、')}\n`;
+        });
+      }
+      out += `\n上記を踏まえて、最もおすすめの${teamCount}チーム分割案と、その理由を教えてください。\n`;
+      return out;
+    }
+    function generateExportText(mode) {
+      mode = mode || state.exportMode || 'all';
+      if (mode === 'team2') return generateTeamExportText(2);
+      if (mode === 'team3') return generateTeamExportText(3);
+      return generateAllExportText();
+    }
+    function updateExportSection() {
+      $('#exportText').value = generateExportText(state.exportMode);
     }
     function updateAll() {
       $('#answeredCount').textContent = Object.keys(state.responses).length;
-      renderCandidates();
+      updateBestCandidateMini();
+      renderCandidateSection();
       renderParticipants();
       renderHeatmap();
       renderEditEntryOptions();
-      $('#exportText').value = generateExportText();
+      updateExportSection();
     }
     function switchView(view) {
       if (!isHost && view !== 'schedule') return;
       $$('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view===view));
       $$('.view').forEach(v => v.classList.remove('active'));
       $(`#view-${view}`).classList.add('active');
+      updateHeroVisibility(view);
       if (view !== 'schedule') updateAll();
       window.scrollTo({top:0, behavior:'smooth'});
-    }
-    async function loadDemoData() {
-      if (!isHost) { showToast('デモ回答の読み込みには管理用URLが必要です'); return; }
-      const ok = await demoRemote();
-      if (!ok) return;
-      updateAll();
-      showToast('8人分のデモ回答を読み込みました');
     }
     function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
     function escapeAttr(str) { return escapeHtml(str); }
@@ -1572,55 +1675,11 @@
         ta.remove();
       }
     }
-    async function applyProjectSettings() {
-      if (!isHost) { showToast('設定の変更には管理用URLが必要です'); return; }
-      const next = {
-        name: $('#projectName').value.trim() || '名称未設定プロジェクト',
-        startDate: $('#startDate').value,
-        endDate: $('#endDate').value,
-        startTime: $('#startTime').value,
-        endTime: $('#endTime').value,
-        slotMinutes: Number($('#slotMinutes').value),
-        meetingMinutes: Number($('#meetingMinutes').value)
-      };
-      if (toDate(next.startDate) > toDate(next.endDate)) { showToast('終了日は開始日以降にしてください'); return; }
-      if (timeToMinutes(next.startTime) >= timeToMinutes(next.endTime)) { showToast('終了時間は開始時間より後にしてください'); return; }
-      const span = (toDate(next.endDate)-toDate(next.startDate))/(1000*60*60*24);
-      if (span > 30) { showToast('調整期間は最大31日までです'); return; }
-      // 開始日・終了日をこのタイミングで変更していた場合に備え、範囲外になった
-      // 「飛ばす日」は保存前に取り除いておく（サーバー側でも同様に検証される）。
-      next.excludedDates = (state.draftExcludedDates || []).filter(d => d >= next.startDate && d <= next.endDate);
-      const ok = await saveSettingsRemote(next);
-      if (!ok) return;
-      state.draft = {};
-      clearUndo();
-      // 保存後のstate.projectはサーバー側で検証済みの値なので、飛ばす日の表示もそこから同期し直す。
-      state.draftExcludedDates = [...(state.project.excludedDates || [])];
-      renderExcludeDateChips();
-      $('#scheduleTitle').textContent = state.project.name;
-      renderSchedule(); updateAll(); showToast('プロジェクト設定を反映しました');
-    }
-    function addExcludeDateFromInput() {
-      if (!isHost) { showToast('設定の変更には管理用URLが必要です'); return; }
-      const input = $('#excludeDateInput');
-      const value = input.value;
-      if (!value) { showToast('飛ばしたい日を選択してください'); return; }
-      const startDate = $('#startDate').value || state.project.startDate;
-      const endDate = $('#endDate').value || state.project.endDate;
-      if (value < startDate || value > endDate) { showToast('開始日〜終了日の範囲内の日付を選択してください'); return; }
-      if (!state.draftExcludedDates.includes(value)) {
-        state.draftExcludedDates = [...state.draftExcludedDates, value].sort();
-        renderExcludeDateChips();
-      }
-      input.value = '';
-    }
     $$('.nav-tab').forEach(tab => tab.addEventListener('click', () => switchView(tab.dataset.view)));
     $('#parseNatural').addEventListener('click', parseNaturalLanguage);
     $('#saveResponse').addEventListener('click', saveResponse);
     $('#toggleEditEntry').addEventListener('click', toggleEditEntryForm);
     $('#editEntrySubmit').addEventListener('click', submitEditEntry);
-    $('#applySettings').addEventListener('click', applyProjectSettings);
-    $('#addExcludeDate').addEventListener('click', addExcludeDateFromInput);
     $('#copyUrl').addEventListener('click', async () => { await copyText($('#shareUrl').value); showToast('共有URLをコピーしました'); });
     if ($('#copyHostUrl')) $('#copyHostUrl').addEventListener('click', async () => { await copyText($('#hostUrl').value); showToast('管理用URLをコピーしました'); });
     $('#copyExport').addEventListener('click', async () => { await copyText($('#exportText').value); showToast('文章をコピーしました'); });
@@ -1628,7 +1687,20 @@
       const blob = new Blob([$('#exportText').value], {type:'text/plain;charset=utf-8'});
       const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='日程調整まとめ.txt'; a.click(); URL.revokeObjectURL(a.href);
     });
-    $('#loadDemo').addEventListener('click', loadDemoData);
+    $$('[data-candidate-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.candidateMode = btn.dataset.candidateMode;
+        $$('[data-candidate-mode]').forEach(b => b.classList.toggle('active', b === btn));
+        renderCandidateSection();
+      });
+    });
+    $$('[data-export-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.exportMode = btn.dataset.exportMode;
+        $$('[data-export-mode]').forEach(b => b.classList.toggle('active', b === btn));
+        updateExportSection();
+      });
+    });
     $('#refreshAnalysis').addEventListener('click', () => { updateAll(); showToast('最新の回答で再集計しました'); });
     $('#resetAll').addEventListener('click', async () => {
       if (!isHost) { showToast('初期化には管理用URLが必要です'); return; }
