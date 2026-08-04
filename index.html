@@ -54,10 +54,12 @@
     .card + .card { margin-top: 20px; }
     .card-title { font-size: 18px; font-weight: 800; margin: 0 0 4px; }
     .card-sub { font-size: 13px; color: var(--muted); margin: 0 0 22px; line-height: 1.7; }
-    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; min-width: 0; }
     .field label { font-size: 12px; font-weight: 700; color: var(--muted); }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .input, .select { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; background: #fff; color: var(--ink); width: 100%; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; min-width: 0; }
+    .field-row > .field { min-width: 0; }
+    .input, .select { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; background: #fff; color: var(--ink); width: 100%; max-width: 100%; min-width: 0; }
+    input[type="date"], input[type="time"] { min-width: 0; max-width: 100%; }
     .input:focus, .select:focus { border-color: var(--gold); }
     .btn { border: 0; border-radius: 999px; padding: 14px 22px; font-weight: 800; font-size: 14px; transition: .15s ease; }
     .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 12px 28px rgba(22,30,44,.22); }
