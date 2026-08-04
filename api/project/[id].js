@@ -67,7 +67,10 @@ module.exports = async (req, res) => {
       // データが存在しない。存在しない場合は空配列を補って返すことで、
       // 過去のプロジェクトを開いてもエラーにならないようにする。
       const project = { excludedDates: [], ...data.project };
-      res.status(200).json({ project, responses: sanitizeResponses(data.responses), isHost });
+      // 管理者（トークン所有者）には、パスワードを確認・変更できるように生の回答データを返す。
+      // 一般の参加者にはこれまで通りパスワードを取り除いたデータのみを返す。
+      const responses = isHost ? (data.responses || {}) : sanitizeResponses(data.responses);
+      res.status(200).json({ project, responses, isHost });
       return;
     }
 
@@ -77,18 +80,48 @@ module.exports = async (req, res) => {
       if (body.action === 'verify') {
         const name = String(body.name || '').trim().slice(0, 40);
         const password = String(body.password || '').slice(0, 40);
+        // パスワードが未入力の場合は、常に照合エラーとして修正画面へ進めないようにする。
+        if (!password) {
+          res.status(403).json({ error: 'パスワードを入力してください' });
+          return;
+        }
         const entry = (data.responses || {})[name];
         if (!entry) {
           res.status(404).json({ error: 'その名前の回答が見つかりませんでした' });
           return;
         }
         const existingPassword = String(entry.password || '');
+        // パスワードが未設定の回答は、本人でも自己修正できない（管理者に設定してもらう必要がある）。
+        if (!existingPassword) {
+          res.status(403).json({ error: 'この回答にはまだパスワードが設定されていません。主催者に確認してください。' });
+          return;
+        }
         if (existingPassword !== password) {
           res.status(403).json({ error: 'パスワードが正しくありません' });
           return;
         }
         // 照合に成功した本人にだけ、自分の回答内容（パスワードを含む）を返す。
         res.status(200).json({ entry });
+        return;
+      }
+      // 主催者が、参加者の修正用パスワードを確認・変更するための専用アクション。
+      if (body.action === 'setPassword') {
+        const token = String(body.token || '');
+        if (!token || token !== data.editToken) {
+          res.status(403).json({ error: '権限がありません' });
+          return;
+        }
+        const name = String(body.name || '').trim().slice(0, 40);
+        const entry = (data.responses || {})[name];
+        if (!entry) {
+          res.status(404).json({ error: 'その名前の回答が見つかりませんでした' });
+          return;
+        }
+        const newPassword = String(body.password || '').slice(0, 40);
+        entry.password = newPassword;
+        entry.updatedAt = new Date().toISOString();
+        await setProject(id, data);
+        res.status(200).json({ ok: true, password: newPassword });
         return;
       }
       res.status(400).json({ error: '不正なリクエストです' });
