@@ -851,10 +851,11 @@
       return true;
     }
     async function saveResponseRemote(name, availability, originalText, comment, password) {
+      const summaryText = summarizeAvailability(availability);
       const res = await fetch(`/api/project/${PROJECT_ID}/respond`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, availability, originalText, comment, password, token: HOST_TOKEN })
+        body: JSON.stringify({ name, availability, originalText, comment, password, summaryText, token: HOST_TOKEN })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
