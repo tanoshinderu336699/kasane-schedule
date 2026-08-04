@@ -113,7 +113,9 @@ module.exports = async (req, res) => {
   }
 
   res.status(200).json({
-    responses: sanitizeResponses(data.responses),
+    // 主催者からのリクエストには、パスワードを含む生の回答データを返す
+    // （管理画面でパスワード一覧を表示・変更できるようにするため）。
+    responses: isHostRequest ? data.responses : sanitizeResponses(data.responses),
     // 送信した本人（または代理で修正した主催者）にだけ、確認画面に表示するためのパスワードを返す
     password: finalPassword
   });
