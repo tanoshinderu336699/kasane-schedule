@@ -61,38 +61,47 @@ module.exports = async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    if (project.startDate > project.endDate) {
-      res.status(400).json({ error: '終了日は開始日以降にしてください' });
-      return;
-    }
+  if (project.startDate > project.endDate) {
+    res.status(400).json({ error: '終了日は開始日以降にしてください' });
+    return;
+  }
 
-    // 開始日〜終了日の範囲内で、飛ばしたい日（対象から外す日）があれば反映する。
-    project.excludedDates = sanitizeExcludedDates(body.excludedDates, project.startDate, project.endDate);
+  // 開始日〜終了日の範囲内で、飛ばしたい日（対象から外す日）があれば反映する。
+  project.excludedDates = sanitizeExcludedDates(body.excludedDates, project.startDate, project.endDate);
 
-    const id = genId(6);
+  const id = genId(6);
     const editToken = genToken(18);
 
-    // ログイン中のユーザーが作成した場合は、削除時に過去プロジェクト一覧からも
-    // 取り除けるよう、所有者のユーザーIDをプロジェクトデータ自体にも保存しておく。
-    const user = getSessionUser(req.headers.cookie);
+  // ログイン中のユーザーが作成した場合は、削除時に過去プロジェクト一覧からも
+  // 取り除けるよう、所有者のユーザーIDをプロジェクトデータ自体にも保存しておく。
+  const user = getSessionUser(req.headers.cookie);
 
-    await setProject(id, { project, editToken, responses: {}, ownerSub: user ? user.sub : null });
+  await setProject(id, {
+    project,
+    editToken,
+    responses: {},
+    ownerSub: user ? user.sub : null,
+    // Googleアカウントでログインして作成した場合のみ、回答通知メールの送信先として
+    // メールアドレスを保存する。未ログインで作成した場合は null のままにし、
+    // 誰かが回答してもどこにも通知メールを送らない仕様にする。
+    ownerEmail: user && user.email ? user.email : null
+  });
 
-    // ログイン中のユーザーが作成した場合は、そのユーザーの過去プロジェクト一覧に追加します。
-    if (user) {
-      try {
-        await addUserProject(user.sub, {
-          id,
-          token: editToken,
-          name: project.name,
-          createdAt: project.createdAt
-        });
-      } catch (e) {
-        // プロジェクト一覧への追加に失敗しても、作成自体は成功として扱う
-      }
+  // ログイン中のユーザーが作成した場合は、そのユーザーの過去プロジェクト一覧に追加します。
+  if (user) {
+    try {
+      await addUserProject(user.sub, {
+        id,
+        token: editToken,
+        name: project.name,
+        createdAt: project.createdAt
+      });
+    } catch (e) {
+      // プロジェクト一覧への追加に失敗しても、作成自体は成功として扱う
     }
+  }
 
-    res.status(200).json({ id, token: editToken });
+  res.status(200).json({ id, token: editToken });
   } catch (e) {
     res.status(500).json({ error: e.message || 'サーバーエラーが発生しました' });
   }
