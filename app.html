@@ -227,12 +227,12 @@
     .exclude-date-empty { font-size:11px; color:var(--muted); margin-top:8px; }
     .participant-header {
       display:flex; flex-wrap:wrap; align-items:end; gap:12px;
-      margin-bottom:18px;
+      margin-bottom:24px;
     }
     .participant-header .field { margin:0; flex:1; min-width:210px; }
     .nl-box {
       display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px;
-      align-items:end; margin-bottom:18px; padding:16px;
+      align-items:end; margin-bottom:26px; padding:16px;
       background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(250,248,245,.92));
       border:1px solid var(--line); border-radius:18px;
     }
@@ -267,12 +267,12 @@
     .slot.yes::after { content:"○"; color:var(--yes); opacity:1; transform:scale(1); }
     .slot.maybe::after { content:"△"; color:var(--maybe); opacity:1; transform:scale(1); }
     .slot.dragging { box-shadow: inset 0 0 0 2px rgba(22,30,44,.18); }
-    .legend { display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:12px; margin:14px 2px 0; }
+    .legend { display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:12px; margin:18px 2px 26px; }
     .legend-item { display:flex; align-items:center; gap:7px; }
     .dot { width:12px; height:12px; border-radius:4px; border:1px solid var(--line); }
     .dot.yes { background:var(--yes-soft); border-color:#f3bdc1; }
     .dot.maybe { background:var(--maybe-soft); border-color:#c8d5ff; }
-    .action-footer { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }
+    .action-footer { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-top:26px; padding-top:22px; border-top:1px solid var(--line); }
     .save-note { font-size:12px; color:var(--muted); }
     .analysis-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:24px; }
     .candidate-list { display:grid; gap:12px; }
@@ -323,14 +323,14 @@
     }
     .toast.show { opacity:1; transform:translateY(0); }
     .drag-hint {
-      display:flex; align-items:center; gap:9px; margin-bottom:14px;
-      padding:11px 14px; border-radius:14px;
-      background:var(--maybe-soft); color:#2f4faa; font-size:12.5px; line-height:1.6; font-weight:700;
+      display:flex; align-items:center; gap:9px; margin-bottom:22px;
+      padding:14px 16px; border-radius:14px;
+      background:var(--maybe-soft); color:#2f4faa; font-size:12.5px; line-height:2; font-weight:700;
     }
     .drag-hint .drag-hint-icon { font-size:16px; flex:none; }
     .mode-bar {
       display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-      margin-bottom:12px; padding:10px 12px; border-radius:14px;
+      margin-bottom:20px; padding:12px 14px; border-radius:14px;
       background:#f7f6f3; border:1px solid var(--line);
     }
     .mode-bar-label { font-size:12px; font-weight:800; color:var(--muted); flex:none; }
@@ -407,8 +407,8 @@
     .edit-entry-status.warn { color:#b33a44; }
     .edit-mode-banner {
       display:none; align-items:center; gap:8px; margin-bottom:16px;
-      padding:11px 14px; border-radius:14px;
-      background:#fff3d6; color:#8a5a0a; font-size:12.5px; line-height:1.6; font-weight:700;
+      padding:14px 16px; border-radius:14px;
+      background:#fff3d6; color:#8a5a0a; font-size:12.5px; line-height:2; font-weight:700;
     }
     .edit-mode-banner.show { display:flex; }
     .edited-badge {
@@ -608,12 +608,11 @@
               <div class="nl-hint">反映後に必ず選択結果をご確認ください。</div>
             </div>
             <div class="drag-hint">
-              <span class="drag-hint-icon">👆</span>
               <span>
                 ・丸を押すと、一日まとめて選択できます<br>
                 ・バツを押すと、消去できます<br>
                 もう一度タップすると解除されます。<br>
-                💡 丸が複数表示されるのは、その予定に必要な時間の長さを表しています。
+                丸が複数表示されるのは、その予定に必要な時間の長さを表しています。
               </span>
             </div>
             <div class="mode-bar">
