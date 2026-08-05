@@ -192,12 +192,10 @@
     .card-title { margin:0; font-size:20px; letter-spacing:-.02em; }
     .card-sub { color:var(--muted); font-size:13px; line-height:1.7; margin-top:6px; }
     .section-label { margin: 24px 0 10px; font-size:12px; font-weight:800; color:var(--muted); letter-spacing:.08em; }
-    .field { display:grid; gap:8px; margin-bottom:15px; min-width:0; }
+    .field { display:grid; gap:8px; margin-bottom:15px; }
     .field label { font-size:12px; font-weight:800; color:#505865; }
     .input, .select, .textarea {
       width:100%;
-      max-width:100%;
-      min-width:0;
       border:1px solid var(--line-strong);
       background:rgba(255,255,255,.9);
       border-radius:13px;
@@ -209,9 +207,7 @@
     }
     .textarea { min-height:112px; resize:vertical; line-height:1.7; }
     .input:focus, .select:focus, .textarea:focus { border-color:rgba(79,124,255,.62); box-shadow:0 0 0 4px rgba(79,124,255,.10); outline:0; }
-    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; min-width:0; }
-    .field-row > .field { min-width:0; }
-    input[type="date"], input[type="time"] { min-width:0; max-width:100%; }
+    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .helper { font-size:11px; color:var(--muted); line-height:1.6; }
     .share-box { display:flex; gap:8px; margin-top:10px; }
     .share-box .input { font-size:16px; min-height:44px; }
@@ -229,17 +225,6 @@
       display:grid; place-items:center; padding:0;
     }
     .exclude-date-empty { font-size:11px; color:var(--muted); margin-top:8px; }
-    .schedule-meta {
-      margin-bottom:18px; padding:14px 16px;
-      background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(250,248,245,.92));
-      border:1px solid var(--line); border-radius:16px;
-    }
-    .schedule-meta-row {
-      display:flex; align-items:flex-start; gap:8px;
-      font-size:13px; line-height:1.7; color:var(--ink);
-    }
-    .schedule-meta-row + .schedule-meta-row { margin-top:8px; }
-    .schedule-meta-icon { flex:none; }
     .participant-header {
       display:flex; flex-wrap:wrap; align-items:end; gap:12px;
       margin-bottom:18px;
@@ -311,17 +296,6 @@
     .heatmap th, .heatmap td { border-right:1px solid #ece8e2; border-bottom:1px solid #ece8e2; padding:9px; text-align:center; }
     .heatmap th { position:sticky; top:0; background:#faf8f4; z-index:2; }
     .heatmap .time-col { position:sticky; left:0; background:#faf8f4; z-index:1; text-align:right; color:var(--muted); }
-    .heatmap td.heat-cell { cursor:pointer; }
-    .heatmap td.heat-cell:hover { outline:2px solid #2f4faa; outline-offset:-2px; }
-    .heatmap-modal-group + .heatmap-modal-group { margin-top:14px; }
-    .heatmap-modal-label { font-size:12px; font-weight:800; color:var(--muted); margin-bottom:6px; }
-    .heatmap-modal-names { display:flex; flex-wrap:wrap; gap:8px; }
-    .heatmap-modal-chip {
-      display:inline-flex; align-items:center; padding:6px 12px;
-      border-radius:999px; font-size:13px; font-weight:700;
-    }
-    .heatmap-modal-chip.yes { background:var(--yes-soft); color:#b63f47; }
-    .heatmap-modal-chip.maybe { background:var(--maybe-soft); color:#355ecb; }
     .heat-cell { min-width:86px; }
     .heat-cell.level-0 { background:#fff; }
     .heat-cell.level-1 { background:#fff5f5; }
@@ -594,27 +568,13 @@
             <div class="card-head">
               <div>
                 <h2 class="card-title" id="scheduleTitle">8月チームミーティング</h2>
-                <div class="card-sub guest-only">お名前を入力し、行ける時間のマスを「タップ」して○や△をつけてください。</div>
+                <div class="card-sub">お名前を入力し、行ける時間のマスを「タップ」して○や△をつけてください。</div>
               </div>
             </div>
-            <div class="schedule-meta" id="scheduleMeta">
-              <div class="schedule-meta-row">
-                <span class="schedule-meta-icon">📅</span>
-                <span id="scheduleMetaPeriod"></span>
-              </div>
-              <div class="schedule-meta-row" id="scheduleMetaExcludedRow" style="display:none">
-                <span class="schedule-meta-icon">🚫</span>
-                <span id="scheduleMetaExcluded"></span>
-              </div>
-              <div class="schedule-meta-row">
-                <span class="schedule-meta-icon">⏱️</span>
-                <span id="scheduleMetaDuration"></span>
-              </div>
-            </div>
-            <div class="edit-mode-banner guest-only" id="editModeBanner">
+            <div class="edit-mode-banner" id="editModeBanner">
               ✏️ <span id="editModeBannerText">修正モードです。内容を直して送信すると上書きされます。</span>
             </div>
-            <div class="edit-entry-box guest-only" id="editEntryBox">
+            <div class="edit-entry-box" id="editEntryBox">
               <button type="button" class="edit-entry-toggle" id="toggleEditEntry">✏️ すでに回答した内容を修正したい方はこちら</button>
               <div class="edit-entry-form" id="editEntryForm" style="display:none">
                 <div class="helper">前回の回答時に設定した「お名前」と「パスワード」を入力すると、修正画面に移動できます。</div>
@@ -632,55 +592,57 @@
                 <div class="edit-entry-status" id="editEntryStatus"></div>
               </div>
             </div>
-            <div class="participant-header guest-only">
+            <div class="participant-header">
               <div class="field">
                 <label for="participantName">あなたのお名前</label>
                 <input class="input" id="participantName" placeholder="例：田中 花子" autocomplete="name" />
               </div>
             </div>
-            <div class="nl-box guest-only">
+            <div class="nl-box">
               <div class="field">
                 <label for="naturalInput">言葉で日程を入力</label>
+                <div class="nl-hint">🤖 AIを搭載しているので、自由に話していただくだけで、その内容が自然に日程へ反映される仕組みになっています。</div>
                 <textarea class="textarea" id="naturalInput" placeholder="例：3日と4日以外はオッケーです。6日は15時以降なら確実に行けます。"></textarea>
                 <div class="nl-hint">スマホの音声入力もそのまま使えます。反映後に必ず選択結果をご確認ください。</div>
               </div>
               <button class="btn btn-secondary" id="parseNatural">日程に反映</button>
             </div>
-            <div class="drag-hint guest-only">
+            <div class="drag-hint">
               <span class="drag-hint-icon">👆</span>
               <span>
                 下の○／△ボタンでモードを選んでからマスをタップすると、必要な時間ぶんまとめて選択されます。もう一度タップすると解除されます。<br>
-                日にちの見出し下にある○／△／×ボタンを押すと、その日全体をまとめて選択・消去できます。
+                日にちの見出し下にある○／△／×ボタンを押すと、その日全体をまとめて選択・消去できます。<br>
+                💡 タップした際に丸（○）がまとめて複数表示されるのは、今回の予定に必要な時間の長さを表しています（例：丸が4つ表示される場合は120分かかる予定という意味です）。
               </span>
             </div>
-            <div class="mode-bar guest-only">
+            <div class="mode-bar">
               <span class="mode-bar-label">タップで選ぶ内容</span>
               <div class="mode-bar-btns">
                 <button type="button" class="mode-btn mode-btn-yes" id="modeBtnYes">○ 行ける</button>
                 <button type="button" class="mode-btn mode-btn-maybe" id="modeBtnMaybe">△ 行けるかも</button>
               </div>
             </div>
-            <div class="parse-status guest-only" id="parseStatus"></div>
-            <div class="schedule-wrap guest-only" id="scheduleWrap">
+            <div class="parse-status" id="parseStatus"></div>
+            <div class="schedule-wrap" id="scheduleWrap">
               <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
-            <div class="scroll-hint guest-only" id="scrollHint">↔️ 日程が多いときは、表を横にスクロールして確認できます</div>
-            <div class="legend guest-only">
+            <div class="scroll-hint" id="scrollHint">↔️ 日程が多いときは、表を横にスクロールして確認できます</div>
+            <div class="legend">
               <div class="legend-item"><span class="dot yes"></span> ○ 行ける</div>
               <div class="legend-item"><span class="dot maybe"></span> △ 行けるかも</div>
               <div class="legend-item"><span class="dot"></span> 未選択・行けない</div>
               <div class="legend-item">タップで選択・切り替え</div>
             </div>
-            <div class="field comment-field guest-only">
+            <div class="field comment-field">
               <label for="participantComment">コメント・備考（任意）</label>
               <textarea class="textarea" id="participantComment" placeholder="例：14時以降なら延長も可能です。当日は少し遅れるかもしれません。" style="min-height:80px"></textarea>
             </div>
-            <div class="field guest-only">
+            <div class="field">
               <label for="participantPassword">修正用パスワード（任意）</label>
               <input class="input" id="participantPassword" type="text" maxlength="40" placeholder="例：1234 / たなか / あ　など何でもOK" />
               <div class="helper">🔐 あとで内容を修正したいときに使う合言葉です。数字1文字や自分の名前でもOK。空欄のままでも送信できますが、その場合は誰でも上書きできてしまうのでご注意ください。</div>
             </div>
-            <div class="action-footer guest-only">
+            <div class="action-footer">
               <div class="save-note">「回答を送信」を押すとサーバーに保存され、共有URLを知る全員に公開されます。</div>
               <div style="display:flex;gap:10px;flex-wrap:wrap">
                 <button class="btn btn-secondary" id="undoLast" disabled title="直前の1操作を取り消します">↩ 1個戻る</button>
@@ -772,17 +734,6 @@
         </div>
         <div class="email-status" id="emailSendStatus"></div>
         <button class="btn btn-primary" id="submitModalOk" style="width:100%;margin-top:20px">閉じる</button>
-      </div>
-    </div>
-    <div class="modal-overlay" id="heatmapModalOverlay">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="heatmapModalTitle">
-        <div class="modal-head">
-          <h2 id="heatmapModalTitle">この時間帯の参加者</h2>
-          <button class="modal-close" id="closeHeatmapModal" aria-label="閉じる">×</button>
-        </div>
-        <div class="card-sub" id="heatmapModalSubtitle"></div>
-        <div id="heatmapModalBody" style="margin-top:14px"></div>
-        <button class="btn btn-primary" id="heatmapModalOk" style="width:100%;margin-top:20px">閉じる</button>
       </div>
     </div>
   </div>
@@ -930,16 +881,6 @@
       if (!res.ok) return { ok: false, error: data.error || '確認に失敗しました' };
       return { ok: true, entry: data.entry };
     }
-    async function updateResponsePassword(name, newPassword) {
-      const res = await fetch(`/api/project/${PROJECT_ID}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'setPassword', name, password: newPassword, token: HOST_TOKEN })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) { showToast(data.error || 'パスワードの変更に失敗しました'); return false; }
-      return true;
-    }
     async function resetRemote() {
       const res = await fetch(`/api/project/${PROJECT_ID}/reset`, {
         method: 'POST',
@@ -969,9 +910,6 @@
     }
     function applyHostVisibility() {
       $$('.host-only').forEach(el => { el.style.display = isHost ? '' : 'none'; });
-      // 主催者は自分の名前や参加日時を登録することがないため、
-      // 参加者向けの入力欄（お名前・日程入力エリアなど）は主催者画面では非表示にする。
-      $$('.guest-only').forEach(el => { el.style.display = isHost ? 'none' : ''; });
       const guestActions = $('#guestActions');
       if (guestActions) guestActions.style.display = isHost ? 'none' : '';
       // 参加者（共有URLからの訪問者）には「新しいプロジェクトを作る」「プロジェクト設定」
@@ -1003,29 +941,6 @@
     }
     function syncInputsFromState() {
       $('#scheduleTitle').textContent = state.project.name;
-      renderScheduleMeta();
-    }
-    function renderScheduleMeta() {
-      const p = state.project;
-      const periodEl = $('#scheduleMetaPeriod');
-      if (periodEl) {
-        periodEl.textContent = `${formatDate(p.startDate)}〜${formatDate(p.endDate)}、開始${p.startTime}〜終了${p.endTime}の間でお選びください`;
-      }
-      const excluded = (p.excludedDates || []).slice().sort();
-      const excludedRow = $('#scheduleMetaExcludedRow');
-      const excludedEl = $('#scheduleMetaExcluded');
-      if (excludedRow && excludedEl) {
-        if (excluded.length) {
-          excludedEl.textContent = `${excluded.map(formatDate).join('・')}は今回の候補には含まれていません`;
-          excludedRow.style.display = '';
-        } else {
-          excludedRow.style.display = 'none';
-        }
-      }
-      const durationEl = $('#scheduleMetaDuration');
-      if (durationEl) {
-        durationEl.textContent = `1回の所要時間：${p.meetingMinutes}分`;
-      }
     }
     function renderSchedule() {
       const dates = getDates();
@@ -1314,7 +1229,6 @@
       const name = $('#editEntryName').value;
       const password = $('#editEntryPassword').value.trim();
       if (!name) { setEditEntryStatus('お名前を選択してください', 'warn'); return; }
-      if (!password) { setEditEntryStatus('パスワードを入力してください', 'warn'); return; }
       const btn = $('#editEntrySubmit');
       btn.disabled = true;
       const result = await verifyResponsePassword(name, password);
@@ -1622,22 +1536,8 @@
           </div>
           <div class="person-summary">${escapeHtml(summarizeAvailability(p.availability))}</div>
           ${p.comment ? `<div class="person-comment">💬 ${escapeHtml(p.comment)}</div>` : ''}
-          <div class="person-password" style="margin-top:8px;font-size:13px;color:var(--muted)">🔑 パスワード：<strong style="color:var(--ink)">${p.password ? escapeHtml(p.password) : '未設定'}</strong> <button class="btn btn-ghost btn-small" data-change-password="${escapeAttr(p.name)}">変更</button></div>
         </div>`;
       }).join('');
-      $$('[data-change-password]').forEach(btn => btn.addEventListener('click', async () => {
-        const name = btn.dataset.changePassword;
-        const current = (state.responses[name] && state.responses[name].password) || '';
-        const next = window.prompt(`${name}さんの修正用パスワードを入力してください（空欄にすると未設定になります）`, current);
-        if (next === null) return;
-        const trimmed = next.trim().slice(0, 40);
-        const ok = await updateResponsePassword(name, trimmed);
-        if (ok) {
-          state.responses[name].password = trimmed;
-          renderParticipants();
-          showToast(`${name}さんのパスワードを変更しました`);
-        }
-      }));
       $$('[data-edit-person]').forEach(btn => btn.addEventListener('click', () => {
         const name = btn.dataset.editPerson;
         const p = state.responses[name];
@@ -1674,42 +1574,12 @@
           });
           const ratio = names.length ? yes/names.length : 0;
           const level = ratio===0?0:ratio<.25?1:ratio<.5?2:ratio<.75?3:4;
-          html += `<td class="heat-cell level-${level}" data-date="${ds}" data-time="${time}" title="○ ${yes}人／△ ${maybe}人（タップで詳細を表示）"><strong>${yes}<small style="font-size:10px"> ○</small></strong><span>${maybe} △</span></td>`;
+          html += `<td class="heat-cell level-${level}" title="○ ${yes}人／△ ${maybe}人"><strong>${yes}<small style="font-size:10px"> ○</small></strong><span>${maybe} △</span></td>`;
         });
         html += '</tr>';
       });
       html += '</tbody>';
       table.innerHTML = html;
-    }
-    function openHeatmapModal(ds, time) {
-      const names = Object.keys(state.responses);
-      const yesNames = [];
-      const maybeNames = [];
-      names.forEach(name => {
-        const v = state.responses[name].availability[key(ds,time)];
-        if (v==='yes') yesNames.push(name);
-        else if (v==='maybe') maybeNames.push(name);
-      });
-      const d = toDate(ds);
-      const label = `${d.getMonth()+1}月${d.getDate()}日（${jpWeek[d.getDay()]}）${time}`;
-      $('#heatmapModalTitle').textContent = `${label} の参加者`;
-      const total = yesNames.length + maybeNames.length;
-      $('#heatmapModalSubtitle').textContent = total ? `○ ${yesNames.length}人／△ ${maybeNames.length}人` : 'この時間帯を選んでいる人はまだいません';
-      let bodyHtml = '';
-      if (yesNames.length) {
-        bodyHtml += `<div class="heatmap-modal-group"><div class="heatmap-modal-label">○ 行ける（${yesNames.length}人）</div><div class="heatmap-modal-names">${yesNames.map(n=>`<span class="heatmap-modal-chip yes">${escapeHtml(n)}</span>`).join('')}</div></div>`;
-      }
-      if (maybeNames.length) {
-        bodyHtml += `<div class="heatmap-modal-group"><div class="heatmap-modal-label">△ 行けるかも（${maybeNames.length}人）</div><div class="heatmap-modal-names">${maybeNames.map(n=>`<span class="heatmap-modal-chip maybe">${escapeHtml(n)}</span>`).join('')}</div></div>`;
-      }
-      if (!total) {
-        bodyHtml = '<div class="helper">該当する人がいません。</div>';
-      }
-      $('#heatmapModalBody').innerHTML = bodyHtml;
-      $('#heatmapModalOverlay').classList.add('show');
-    }
-    function closeHeatmapModal() {
-      $('#heatmapModalOverlay').classList.remove('show');
     }
     function buildParticipantBlock() {
       const entries = Object.values(state.responses);
@@ -1858,17 +1728,6 @@
     $('#closeSubmitModal').addEventListener('click', closeSubmitModal);
     $('#submitModalOk').addEventListener('click', closeSubmitModal);
     $('#submitModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'submitModalOverlay') closeSubmitModal(); });
-    $('#heatmap').addEventListener('click', (e) => {
-      const cell = e.target.closest('.heat-cell');
-      if (!cell) return;
-      const ds = cell.dataset.date;
-      const time = cell.dataset.time;
-      if (!ds || !time) return;
-      openHeatmapModal(ds, time);
-    });
-    $('#closeHeatmapModal').addEventListener('click', closeHeatmapModal);
-    $('#heatmapModalOk').addEventListener('click', closeHeatmapModal);
-    $('#heatmapModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'heatmapModalOverlay') closeHeatmapModal(); });
     $('#sendEmailBtn').addEventListener('click', sendSummaryEmail);
     window.addEventListener('resize', updateScrollHint);
     (async function init() {
