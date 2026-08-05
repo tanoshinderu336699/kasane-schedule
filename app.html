@@ -568,7 +568,7 @@
             <div class="card-head">
               <div>
                 <h2 class="card-title" id="scheduleTitle">8月チームミーティング</h2>
-                <div class="card-sub">お名前を入力し、行ける時間のマスを「タップ」して○や△をつけてください。</div>
+                <div class="card-sub" id="scheduleDateRange"></div>
               </div>
             </div>
             <div class="edit-mode-banner" id="editModeBanner">
@@ -603,20 +603,21 @@
                 <label for="naturalInput">言葉で日程を入力</label>
                 <div class="nl-hint">🤖 AIを搭載しているので、自由に話していただくだけで、その内容が自然に日程へ反映される仕組みになっています。</div>
                 <textarea class="textarea" id="naturalInput" placeholder="例：3日と4日以外はオッケーです。6日は15時以降なら確実に行けます。"></textarea>
-                <div class="nl-hint">スマホの音声入力もそのまま使えます。反映後に必ず選択結果をご確認ください。</div>
               </div>
               <button class="btn btn-secondary" id="parseNatural">日程に反映</button>
+              <div class="nl-hint">反映後に必ず選択結果をご確認ください。</div>
             </div>
             <div class="drag-hint">
               <span class="drag-hint-icon">👆</span>
               <span>
-                下の○／△ボタンでモードを選んでからマスをタップすると、必要な時間ぶんまとめて選択されます。もう一度タップすると解除されます。<br>
-                日にちの見出し下にある○／△／×ボタンを押すと、その日全体をまとめて選択・消去できます。<br>
-                💡 タップした際に丸（○）がまとめて複数表示されるのは、今回の予定に必要な時間の長さを表しています（例：丸が4つ表示される場合は120分かかる予定という意味です）。
+                ・丸を押すと、一日まとめて選択できます<br>
+                ・バツを押すと、消去できます<br>
+                もう一度タップすると解除されます。<br>
+                💡 丸が複数表示されるのは、その予定に必要な時間の長さを表しています。
               </span>
             </div>
             <div class="mode-bar">
-              <span class="mode-bar-label">タップで選ぶ内容</span>
+              <span class="mode-bar-label">どちらか選択</span>
               <div class="mode-bar-btns">
                 <button type="button" class="mode-btn mode-btn-yes" id="modeBtnYes">○ 行ける</button>
                 <button type="button" class="mode-btn mode-btn-maybe" id="modeBtnMaybe">△ 行けるかも</button>
@@ -626,12 +627,11 @@
             <div class="schedule-wrap" id="scheduleWrap">
               <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
-            <div class="scroll-hint" id="scrollHint">↔️ 日程が多いときは、表を横にスクロールして確認できます</div>
+            <div class="scroll-hint" id="scrollHint">↕️ 表を上下にスクロールして確認できます</div>
             <div class="legend">
               <div class="legend-item"><span class="dot yes"></span> ○ 行ける</div>
               <div class="legend-item"><span class="dot maybe"></span> △ 行けるかも</div>
               <div class="legend-item"><span class="dot"></span> 未選択・行けない</div>
-              <div class="legend-item">タップで選択・切り替え</div>
             </div>
             <div class="field comment-field">
               <label for="participantComment">コメント・備考（任意）</label>
@@ -643,7 +643,6 @@
               <div class="helper">🔐 あとで内容を修正したいときに使う合言葉です。数字1文字や自分の名前でもOK。空欄のままでも送信できますが、その場合は誰でも上書きできてしまうのでご注意ください。</div>
             </div>
             <div class="action-footer">
-              <div class="save-note">「回答を送信」を押すとサーバーに保存され、共有URLを知る全員に公開されます。</div>
               <div style="display:flex;gap:10px;flex-wrap:wrap">
                 <button class="btn btn-secondary" id="undoLast" disabled title="直前の1操作を取り消します">↩ 1個戻る</button>
                 <button class="btn btn-primary" id="saveResponse">この内容で回答を送信</button>
@@ -941,6 +940,10 @@
     }
     function syncInputsFromState() {
       $('#scheduleTitle').textContent = state.project.name;
+      const dateRangeEl = $('#scheduleDateRange');
+      if (dateRangeEl) {
+        dateRangeEl.textContent = `📅 ${formatDate(state.project.startDate)}〜${formatDate(state.project.endDate)}`;
+      }
     }
     function renderSchedule() {
       const dates = getDates();
